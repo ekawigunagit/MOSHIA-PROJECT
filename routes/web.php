@@ -24,4 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['auth', 'role:super-admin'])->group(function () {
+    // Route halaman pengelolaan diletakkan di sini.
+});
+
+require __DIR__ . '/auth.php';
