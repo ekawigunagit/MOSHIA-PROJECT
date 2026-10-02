@@ -16,7 +16,8 @@ class EnsureProductAccess
     {
         $tenant = $this->workspace->resolve($request);
         abort_unless(
-            $request->user() && $tenant && $this->access->allows($request->user(), $tenant, $product),
+            $request->user() && $request->user()->hasVerifiedEmail()
+                && $tenant && $this->access->allows($request->user(), $tenant, $product),
             403,
             'Workspace tidak memiliki akses aktif untuk produk ini.'
         );

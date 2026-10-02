@@ -2,26 +2,28 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Modules\Core\Tenancy\Models\Tenant;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    public function tenants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Modules\Core\Tenancy\Models\Tenant::class, 'core_tenant_user')->withTimestamps();
+        return $this->belongsToMany(Tenant::class, 'core_tenant_user')->withTimestamps();
     }
 
     protected $fillable = [

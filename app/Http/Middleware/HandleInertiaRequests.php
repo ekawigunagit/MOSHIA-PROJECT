@@ -32,6 +32,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
+                'homeUrl' => $request->user()
+                    ? app(\App\Modules\Core\Catalog\DashboardDestination::class)->home($request->user())
+                    : null,
                 'user' => $request->user(),
 
                 'roles' => $request->user()

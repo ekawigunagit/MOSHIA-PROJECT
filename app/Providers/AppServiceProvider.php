@@ -2,6 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Modules\Core\Entitlement\Contracts\ProductAccess;
+use App\Modules\Core\Entitlement\Services\DatabaseProductAccess;
+use App\Modules\Core\Identity\Policies\UserPolicy;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,8 +20,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            \App\Modules\Core\Entitlement\Contracts\ProductAccess::class,
-            \App\Modules\Core\Entitlement\Services\DatabaseProductAccess::class,
+            ProductAccess::class,
+            DatabaseProductAccess::class,
         );
     }
 
@@ -23,6 +30,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        VerifyEmail::toMailUsing(fn (object $user, string $url) => (new MailMessage)
+            ->subject('Verifikasi email akun Moshia')
+            ->greeting('Halo, '.$user->name.'!')
+            ->line('Klik tombol di bawah untuk memverifikasi email dan mulai menggunakan Moshia.')
+            ->action('Verifikasi email', $url)
+            ->line('Tautan berlaku selama '.config('auth.verification.expire', 60).' menit.')
+            ->line('Jika Anda tidak mendaftar di Moshia, abaikan email ini.')
+            ->salutation('Tim Moshia')
+            ->view(['html' => 'emails.verify-email', 'text' => 'emails.verify-email-text'], [
+                'recipientName' => $user->name,
+                'verificationUrl' => $url,
+                'expiresInMinutes' => config('auth.verification.expire', 60),
+            ]));
+
+        Gate::policy(
+            User::class,
+            UserPolicy::class,
+        );
         Vite::prefetch(concurrency: 3);
     }
 }

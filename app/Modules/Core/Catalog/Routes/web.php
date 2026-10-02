@@ -14,4 +14,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/admin', fn (ProductCatalog $catalog) => Inertia::render('Admin/Index', [
     'products' => $catalog->all(),
+    'stats' => [
+        'users' => \App\Models\User::count(),
+        'workspaces' => \App\Modules\Core\Tenancy\Models\Tenant::count(),
+        'products' => count($catalog->all()),
+    ],
 ]))->middleware(['auth', 'verified', 'role:super-admin'])->name('admin.index');

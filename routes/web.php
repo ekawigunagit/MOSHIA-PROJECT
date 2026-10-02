@@ -16,15 +16,12 @@ Route::get('/', function () {
 });
 
 require app_path('Modules/Core/Catalog/Routes/web.php');
+require app_path('Modules/Core/Identity/Routes/web.php');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-Route::middleware(['auth', 'role:super-admin'])->group(function () {
-    // Route halaman pengelolaan diletakkan di sini.
 });
 
 require __DIR__ . '/auth.php';

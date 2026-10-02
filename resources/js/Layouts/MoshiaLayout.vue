@@ -12,6 +12,15 @@ const user = computed(() => page.props.auth?.user ?? null);
 const roles = computed(() => page.props.auth?.roles ?? []);
 const isSuperAdmin = computed(() => roles.value.includes('super-admin'));
 
+const navigation = computed(() => [
+    ...(isSuperAdmin.value ? [
+        { route: 'admin.index', label: 'Dashboard Admin' },
+        { route: 'admin.users.index', active: 'admin.users.*', label: 'Pengguna & Role' },
+    ] : []),
+    { route: 'dashboard', label: isSuperAdmin.value ? 'Workspace Saya' : 'Dashboard Workspace' },
+    { route: 'profile.edit', label: 'Profil' },
+]);
+
 const flashSuccess = computed(() => page.props.flash?.success ?? null);
 const flashError = computed(() => page.props.flash?.error ?? null);
 
@@ -41,35 +50,18 @@ const closeMobileMenu = () => {
             <!-- Navigation -->
             <nav class="flex-1 space-y-1 px-3 py-5" aria-label="Navigasi utama">
                 <Link
-                    :href="route('dashboard')"
-                    class="block rounded-lg px-4 py-3 text-sm transition-colors duration-150"
-                    :class="route().current('dashboard')
+                    v-for="item in navigation"
+                    :key="item.route"
+                    :href="route(item.route)"
+                    :aria-current="route().current(item.active ?? item.route) ? 'page' : undefined"
+                    class="block rounded-lg px-4 py-3 text-sm transition-colors"
+                    :class="route().current(item.active ?? item.route)
                         ? 'bg-gray-100 font-semibold text-gray-900 dark:bg-[#232326] dark:text-white'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
+                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
+                    @click="closeMobileMenu"
                 >
-                    Dashboard
+                    {{ item.label }}
                 </Link>
-
-                <Link
-                    :href="route('profile.edit')"
-                    class="block rounded-lg px-4 py-3 text-sm transition-colors duration-150"
-                    :class="route().current('profile.edit')
-                        ? 'bg-gray-100 font-semibold text-gray-900 dark:bg-[#232326] dark:text-white'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
-                >
-                    Profil
-                </Link>
-
-                <a
-                    v-if="isSuperAdmin"
-                    :href="route('admin.index')"
-                    class="block rounded-lg px-4 py-3 text-sm transition-colors duration-150"
-                    :class="page.url.startsWith('/admin')
-                        ? 'bg-gray-100 font-semibold text-gray-900 dark:bg-[#232326] dark:text-white'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
-                >
-                    Admin Platform
-                </a>
             </nav>
 
             <!-- User / Logout -->
@@ -123,40 +115,20 @@ const closeMobileMenu = () => {
                 </div>
 
                 <nav class="flex-1 space-y-1 px-3 py-5" aria-label="Navigasi mobile">
-                    <Link
-                        :href="route('dashboard')"
-                        class="block rounded-lg px-4 py-3 text-sm transition-colors"
-                        :class="route().current('dashboard')
-                            ? 'bg-gray-100 font-semibold text-gray-900 dark:bg-[#232326] dark:text-white'
-                            : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
-                        @click="closeMobileMenu"
-                    >
-                        Dashboard
-                    </Link>
-
-                    <Link
-                        :href="route('profile.edit')"
-                        class="block rounded-lg px-4 py-3 text-sm transition-colors"
-                        :class="route().current('profile.edit')
-                            ? 'bg-gray-100 font-semibold text-gray-900 dark:bg-[#232326] dark:text-white'
-                            : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
-                        @click="closeMobileMenu"
-                    >
-                        Profil
-                    </Link>
-
-                    <a
-                        v-if="isSuperAdmin"
-                        :href="route('admin.index')"
-                        class="block rounded-lg px-4 py-3 text-sm transition-colors"
-                        :class="page.url.startsWith('/admin')
-                            ? 'bg-gray-100 font-semibold text-gray-900 dark:bg-[#232326] dark:text-white'
-                            : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
-                        @click="closeMobileMenu"
-                    >
-                        Admin Platform
-                    </a>
-                </nav>
+                <Link
+                    v-for="item in navigation"
+                    :key="item.route"
+                    :href="route(item.route)"
+                    :aria-current="route().current(item.active ?? item.route) ? 'page' : undefined"
+                    class="block rounded-lg px-4 py-3 text-sm transition-colors"
+                    :class="route().current(item.active ?? item.route)
+                        ? 'bg-gray-100 font-semibold text-gray-900 dark:bg-[#232326] dark:text-white'
+                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1a1a1d] dark:hover:text-white'"
+                    @click="closeMobileMenu"
+                >
+                    {{ item.label }}
+                </Link>
+            </nav>
 
                 <div class="border-t border-gray-200 p-4 dark:border-[#27272a]">
                     <div class="mb-3">

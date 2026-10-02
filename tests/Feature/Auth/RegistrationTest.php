@@ -4,7 +4,9 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Tests\TestCase;
 
@@ -21,6 +23,7 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
+        Notification::fake();
         $this->seed(RoleSeeder::class);
 
         $response = $this->post('/register', [
@@ -36,7 +39,10 @@ class RegistrationTest extends TestCase
         $this->assertSame(1, $user->tenants()->count());
         $this->assertSame($user->id, $user->tenants()->first()->owner_id);
         $this->assertFalse($user->hasRole('super-admin', 'web'));
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertFalse($user->hasVerifiedEmail());
+        Notification::assertSentTo($user, VerifyEmail::class);
+        $response->assertRedirect(route('verification.notice'));
+        $this->get('/dashboard')->assertRedirect(route('verification.notice'));
     }
 
     public function test_role_seeder_can_be_run_repeatedly(): void

@@ -24,7 +24,7 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); document.rem
  <header class="site-header shell">
   <a href="#home" class="brand" aria-label="Moshia beranda"><img src="/images/moshia-mark.svg" width="35" height="35" alt=""><span>MOSHIA<span class="brand-dot">.</span></span></a>
   <nav id="navigation" class="navigation" :class="{ 'is-open': menuOpen }" aria-label="Navigasi utama"><a v-for="[id, label] in sections" :key="id" :href="`#${id}`" :class="{ active: activeSection === id }" :aria-current="activeSection === id ? 'location' : undefined" @click="menuOpen = false">{{ label }}</a></nav>
-  <div class="header-actions"><ThemeToggle/><Link v-if="$page.props.auth?.user" :href="route('dashboard')" class="button button-primary header-cta">Dashboard <MoshiaIcon/></Link><Link v-else-if="canLogin" :href="route('login')" class="button button-primary header-cta">Masuk <MoshiaIcon/></Link><button ref="menuButton" class="icon-button menu-toggle" :aria-label="menuOpen ? 'Tutup navigasi' : 'Buka navigasi'" :aria-expanded="menuOpen" aria-controls="navigation" @click="menuOpen = !menuOpen"><MoshiaIcon name="menu"/></button></div>
+  <div class="header-actions"><ThemeToggle/><Link v-if="$page.props.auth?.user" :href="$page.props.auth.homeUrl" class="button button-primary header-cta">Dashboard <MoshiaIcon/></Link><Link v-else-if="canLogin" :href="route('login')" class="button button-primary header-cta">Masuk <MoshiaIcon/></Link><button ref="menuButton" class="icon-button menu-toggle" :aria-label="menuOpen ? 'Tutup navigasi' : 'Buka navigasi'" :aria-expanded="menuOpen" aria-controls="navigation" @click="menuOpen = !menuOpen"><MoshiaIcon name="menu"/></button></div>
  </header>
  <main id="main">
   <section id="home" class="hero shell">

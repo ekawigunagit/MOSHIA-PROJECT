@@ -21,9 +21,9 @@ function selectWorkspace(event) {
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Dashboard Workspace" />
     <MoshiaLayout>
-        <template #header><h2 class="text-xl font-semibold">Dashboard</h2></template>
+        <template #header><h2 class="text-xl font-semibold">Dashboard Workspace</h2></template>
         <div class="shell account-main space-y-8">
             <section class="detail-card dashboard-intro">
                 <span class="section-kicker">WELCOME TO YOUR MOSHIA</span>

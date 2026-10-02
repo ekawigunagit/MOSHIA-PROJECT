@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Core\Tenancy\Actions\CreateWorkspace;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class RegisteredUserController extends Controller
 {
@@ -34,7 +37,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -46,17 +49,25 @@ class RegisteredUserController extends Controller
             ]);
 
             $user->assignRole('user');
-            app(\App\Modules\Core\Tenancy\Actions\CreateWorkspace::class)->handle(
-                $user, \Illuminate\Support\Str::limit($user->name, 80, '').' Workspace'
+            app(CreateWorkspace::class)->handle(
+                $user, Str::limit($user->name, 80, '').' Workspace'
             );
 
             return $user;
         });
 
-        event(new Registered($user));
-
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        try {
+            event(new Registered($user));
+        } catch (TransportExceptionInterface $exception) {
+            report($exception);
+
+            return to_route('verification.notice')->withErrors([
+                'email' => 'Akun sudah dibuat, tetapi email verifikasi gagal dikirim. Silakan coba kirim ulang.',
+            ]);
+        }
+
+        return to_route('verification.notice');
     }
 }

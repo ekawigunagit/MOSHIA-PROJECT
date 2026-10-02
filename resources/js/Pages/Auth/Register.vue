@@ -23,6 +23,7 @@ const submit = () => {
 <template>
     <GuestLayout>
         <Head title="Register" />
+        <p class="mb-5 text-sm text-[var(--muted)]">Gunakan email yang dapat Anda akses. Setelah mendaftar, verifikasi email diperlukan sebelum menggunakan dashboard Moshia.</p>
 
         <form @submit.prevent="submit">
             <div>

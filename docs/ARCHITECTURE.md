@@ -16,11 +16,44 @@ workspace/catalog/access foundation, not the entire Core or product roadmap.
   membership-checked selection, and server-side active-workspace resolution.
 - Registration creates the first workspace in the same transaction as account and role.
   Existing users create a workspace from their dashboard; no silent bulk data migration.
+- Email verification is required through MustVerifyEmail. Registration sends a
+  signed expiring verification link and redirects to the verification notice.
+  Dashboard, admin and workspace endpoints require verified email; product.access
+  also rejects unverified users. Profile remains accessible for email correction.
+  Mail transport failures leave accounts pending with a recoverable resend flow.
+- Existing verified accounts remain unchanged. Gmail SMTP is configured and the
+  user confirmed real registration email delivery and verification worked.
+  Verification email uses branded HTML and plain-text templates; inbox appearance
+  of the new template has not yet been verified. Domain SMTP uses the same configuration.
+  See docs/EMAIL.md for setup, limitations, and migration instructions.
 - Core Entitlement: database-backed ProductAccess contract, active/trial date checks,
   tenant membership checks, and product.access middleware for future product routes.
-- Global super-admin grants access to the admin overview only. It does not bypass
+- Global super-admin grants access to the admin overview and user/role management. It does not bypass
   workspace membership or create paid entitlements.
 - Admin overview is read-only; products remain explicitly planned.
+- Login defaults to `/admin` for super-admin and `/dashboard` for customers.
+  Authenticated visits to login/register and the landing dashboard link use the
+  same role-based home. Admins can still explicitly open their own workspace.
+- Intended login destinations are consumed once and restricted to local dashboard,
+  profile, and (for super-admin only) admin pages. Unknown or external destinations
+  fall back to the role home. Add future product destinations only with their
+  authorization checks; route middleware remains the final access boundary.
+- Admin overview includes global user/workspace/catalog counts, available only
+  behind the admin role middleware. These counts grant no tenant/product access.
+- Core Identity now provides `/admin/users`: paginated name/email search, role
+  filtering, and editing account name/email plus assignments of existing web roles.
+  UserPolicy and admin middleware protect reads and writes. Passwords and tokens
+  are omitted from account payloads; changed email clears email verification.
+- Admins cannot change their own roles. Updates lock the super-admin role row and
+  recheck the actor from the database inside the transaction before applying roles
+  and identity together. This serializes role changes through this action; SQLite
+  feature tests do not validate MySQL row-lock concurrency.
+- Role assignment uses existing roles (initially user/super-admin). Creating or
+  deleting role definitions, editing permissions, deleting/suspending other accounts,
+  and an audit log are not part of this phase. The existing profile self-deletion
+  flow still needs the ownership/deletion policy described below before launch.
+- Intended login URLs also support the admin users list and existing account edit
+  pages after role/policy checks. Mobile and desktop navigation share these links.
 - Existing users, role tables, Breeze controllers, and working layouts are retained.
 
 ## Module boundaries
@@ -29,9 +62,11 @@ app/Modules/Core/
   Catalog/       # product registry and dashboard composition
   Tenancy/       # workspace models/actions/resolution
   Entitlement/   # product-access contract and database implementation
+  Identity/      # admin user management and role assignment policies
 
-Next Core domains: Identity, Billing, Notification, Media, Audit.
-Existing Identity remains in app/Models/User and Breeze controllers for compatibility.
+Next Core domains: Billing, Notification, Media, Audit.
+Identity keeps app/Models/User and Breeze controllers for compatibility; admin
+management lives in Core/Identity with Actions, Policies, Http, and Routes.
 Do not rename users/roles tables solely for naming consistency.
 
 Future product domains:
@@ -63,9 +98,9 @@ Never grant access because a browser reports successful checkout.
 ## Remaining Core work (before Wedding launch)
 
 1. Agree tenant/member roles, ownership transfer, plan pricing, currency, trial and quotas.
-2. Enable MustVerifyEmail after mail delivery is configured and existing-account
-   verification policy is agreed. Existing User currently does not implement it;
-   the verified route middleware alone does not enforce verification.
+2. Move from the working Gmail SMTP setup to domain SMTP when ready.
+   MustVerifyEmail is enabled; existing unverified accounts must also verify,
+   without mass updates to email_verified_at. Verify branded email across clients.
 3. Plans/subscriptions/invoices and a selected payment adapter; signed/authenticated
    webhook verification, idempotent processing and lifecycle/reconciliation tests.
 4. Quota accounting and atomic consumption, notification storage/queue, audit records.
