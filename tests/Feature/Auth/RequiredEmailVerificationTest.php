@@ -142,7 +142,7 @@ class RequiredEmailVerificationTest extends TestCase
         Route::middleware(['web', 'auth', 'product.access:wedding'])->get('/test-verified-product', fn () => 'Product');
         $user = User::factory()->unverified()->create();
         $tenant = app(CreateWorkspace::class)->handle($user, 'Mine');
-        Entitlement::create(['tenant_id' => $tenant->id, 'product_slug' => 'wedding', 'status' => 'active']);
+        Entitlement::create(['tenant_id' => $tenant->id, 'product_id' => \App\Modules\Core\Catalog\Models\Product::where('slug', 'wedding')->value('id'), 'status' => 'active']);
         $this->actingAs($user)->get('/test-verified-product')->assertForbidden();
         $user->markEmailAsVerified();
         $this->get('/test-verified-product')->assertOk();

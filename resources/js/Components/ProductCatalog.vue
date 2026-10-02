@@ -8,7 +8,7 @@ defineProps({ products: { type: Array, default: () => [] }, showAccess: Boolean 
         <article v-for="product in products" :key="product.id" class="detail-card">
             <div class="detail-top">
                 <MoshiaIcon :name="product.icon" />
-                <span>Segera hadir</span>
+                <span>{{ product.status === 'hidden' ? 'Disembunyikan' : 'Segera hadir' }}</span>
             </div>
             <h3>{{ product.title }}</h3>
             <p>{{ product.description }}</p>
@@ -16,8 +16,9 @@ defineProps({ products: { type: Array, default: () => [] }, showAccess: Boolean 
                 {{ product.hasAccess ? 'Hak akses workspace tersedia. Produk belum diluncurkan.' : 'Belum ada hak akses untuk workspace ini.' }}
             </p>
             <div class="detail-label">
-                <span>{{ product.id === 'wedding' ? 'PRODUK PERTAMA YANG DIKEMBANGKAN' : 'DALAM ROADMAP MOSHIA' }}</span>
+                <span>{{ product.slug === 'wedding' ? 'PRODUK PERTAMA YANG DIKEMBANGKAN' : 'DALAM ROADMAP MOSHIA' }}</span>
             </div>
         </article>
     </div>
+    <p v-if="!products.length" class="detail-card">Katalog sedang diperbarui. Silakan periksa kembali nanti.</p>
 </template>

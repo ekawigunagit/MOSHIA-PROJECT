@@ -16,6 +16,8 @@ const navigation = computed(() => [
     ...(isSuperAdmin.value ? [
         { route: 'admin.index', label: 'Dashboard Admin' },
         { route: 'admin.users.index', active: 'admin.users.*', label: 'Pengguna & Role' },
+        { route: 'admin.products.index', active: 'admin.products.*', label: 'Katalog Produk' },
+        { route: 'admin.plans.index', active: 'admin.plans.*', label: 'Draft Paket' },
     ] : []),
     { route: 'dashboard', label: isSuperAdmin.value ? 'Workspace Saya' : 'Dashboard Workspace' },
     { route: 'profile.edit', label: 'Profil' },

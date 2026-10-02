@@ -22,7 +22,7 @@ class DashboardController extends Controller
             'activeWorkspace' => $tenant?->only(['id', 'name']),
             'products' => array_map(fn ($product) => [
                 ...$product,
-                'hasAccess' => $tenant ? $access->allows($request->user(), $tenant, $product['id']) : false,
+                'hasAccess' => $tenant ? $access->allows($request->user(), $tenant, $product['slug']) : false,
             ], $catalog->all()),
         ]);
     }

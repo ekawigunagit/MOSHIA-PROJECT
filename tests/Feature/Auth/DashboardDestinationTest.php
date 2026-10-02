@@ -87,7 +87,7 @@ class DashboardDestinationTest extends TestCase
         $admin->assignRole('super-admin');
         $own = app(CreateWorkspace::class)->handle($admin, 'Admin workspace');
         $foreign = app(CreateWorkspace::class)->handle(User::factory()->create(), 'Customer workspace');
-        Entitlement::create(['tenant_id' => $foreign->id, 'product_slug' => 'wedding', 'status' => 'active']);
+        Entitlement::create(['tenant_id' => $foreign->id, 'product_id' => \App\Modules\Core\Catalog\Models\Product::where('slug', 'wedding')->value('id'), 'status' => 'active']);
 
         $this->actingAs($admin)->get('/admin')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Index')->where('stats.users', 2)

@@ -11,7 +11,22 @@ workspace/catalog/access foundation, not the entire Core or product roadmap.
 
 ## Implemented foundation
 
-- Core Catalog: one product registry for landing, dashboard and admin.
+- Core Catalog: one database registry (`core_products`) for landing, dashboard and
+  admin. Migration 2026_10_02_000002 snapshots the original four products with stable
+  legacy string IDs and preserves their content, phases, and order. A follow-up
+  migration (2026_10_02_000003) converts these to unique slugs and adds an
+  auto-increment numeric primary key; it preserves all existing catalog data. config/moshia.php now
+  only defines allowed editor statuses/icons; it is no longer a product data source.
+- Verified super-admins can edit title, summary, description, icon, sort order, and
+  visibility through `/admin/products`, guarded by ProductPolicy. Product IDs, slugs, and
+  roadmap phases are immutable through HTTP. No create/delete routes are exposed;
+  adding business modules and retiring products require separate lifecycle work.
+- `planned` displays as Segera hadir; `hidden` removes cards from landing and user
+  dashboard while keeping them visible in admin. There is no live/active product
+  option until products ship. Empty catalogs have an explicit frontend message.
+  Hiding a catalog entry does not revoke existing entitlements. ProductCatalog::find
+  deliberately resolves hidden slugs too. Future product routes must still enforce
+  readiness and authorization independently of this catalog visibility setting.
 - Core Tenancy: workspaces and memberships, atomic owner/member creation,
   membership-checked selection, and server-side active-workspace resolution.
 - Registration creates the first workspace in the same transaction as account and role.
@@ -28,9 +43,9 @@ workspace/catalog/access foundation, not the entire Core or product roadmap.
   See docs/EMAIL.md for setup, limitations, and migration instructions.
 - Core Entitlement: database-backed ProductAccess contract, active/trial date checks,
   tenant membership checks, and product.access middleware for future product routes.
-- Global super-admin grants access to the admin overview and user/role management. It does not bypass
+- Global super-admin grants access to the admin overview, user/role and catalog management. It does not bypass
   workspace membership or create paid entitlements.
-- Admin overview is read-only; products remain explicitly planned.
+- Admin overview links to user and catalog editors; no business product is launched.
 - Login defaults to `/admin` for super-admin and `/dashboard` for customers.
   Authenticated visits to login/register and the landing dashboard link use the
   same role-based home. Admins can still explicitly open their own workspace.
@@ -86,6 +101,9 @@ tables. ProductAccess checks entitlement, not product readiness or usage quotas.
 ## Migration and behavior
 
 New migration creates core_tenants, core_tenant_user, core_entitlements.
+Catalog migration 2026_10_02_000002 adds core_products and seeds initial data once.
+It was applied locally without changing existing account/workspace/entitlement row
+counts. Re-running normal migrate skips it and does not overwrite admin catalog edits.
 Run normal migrations before opening dashboard or registering. No migration:fresh.
 The owner is also a member. Account deletion currently cascades its owned workspaces;
 add ownership transfer/deletion safeguards before collaboration or paid data launches.
@@ -120,3 +138,12 @@ Production needs provisioned MySQL, Redis workers/scheduler, object storage, HTT
 mail and payment/WhatsApp providers, backup/restore and monitoring.
 Do not treat missing infrastructure as installed or run commands against the blueprint server.
 Every npm run build/dev still requires user approval via the tool approval button.
+
+## Product identity separation
+
+core_products.id is numeric and auto-incrementing; slug is a unique string.
+Editor URL binding, landing anchors, and ProductAccess continue using slugs.
+Payloads expose both id and slug. Ordering uses sort_order then slug.
+core_entitlements.product_slug remains unchanged; a numeric product_id relation
+is separate future work. MySQL migration preserved catalog content and entitlement
+data; SQLite tests cover forward/reverse migration, numeric IDs, and slug uniqueness.

@@ -2,15 +2,21 @@
 
 namespace App\Modules\Core\Catalog;
 
+use App\Modules\Core\Catalog\Models\Product;
+
 class ProductCatalog
 {
-    public function all(): array
+    public function all(bool $includeHidden = false): array
     {
-        return array_values(config('moshia.products', []));
+        return Product::query()
+            ->when(! $includeHidden, fn ($query) => $query->where('status', 'planned'))
+            ->orderBy('sort_order')->orderBy('slug')->get()
+            ->map(fn (Product $product) => $product->catalogData())->all();
     }
 
     public function find(string $slug): ?array
     {
-        return config("moshia.products.$slug");
+        // Visibility is not entitlement revocation; stable product slugs stay valid.
+        return Product::where('slug', $slug)->first()?->catalogData();
     }
 }

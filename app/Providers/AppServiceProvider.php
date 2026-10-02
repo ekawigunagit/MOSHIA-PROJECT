@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\Core\Billing\Models\Plan;
+use App\Modules\Core\Billing\Policies\PlanPolicy;
+use App\Modules\Core\Catalog\Models\Product;
+use App\Modules\Core\Catalog\Policies\ProductPolicy;
 use App\Modules\Core\Entitlement\Contracts\ProductAccess;
 use App\Modules\Core\Entitlement\Services\DatabaseProductAccess;
 use App\Modules\Core\Identity\Policies\UserPolicy;
@@ -30,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Plan::class, PlanPolicy::class);
+        Gate::policy(Product::class, ProductPolicy::class);
         VerifyEmail::toMailUsing(fn (object $user, string $url) => (new MailMessage)
             ->subject('Verifikasi email akun Moshia')
             ->greeting('Halo, '.$user->name.'!')

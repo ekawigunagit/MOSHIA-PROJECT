@@ -14,7 +14,8 @@ class DatabaseProductAccess implements ProductAccess
 
     public function allows(User $user, Tenant $tenant, string $product): bool
     {
-        if (! $this->catalog->find($product) || ! $tenant->members()->whereKey($user->id)->exists()) {
+        $catalogProduct = $this->catalog->find($product);
+        if (! $catalogProduct || ! $tenant->members()->whereKey($user->id)->exists()) {
             return false;
         }
 
@@ -22,7 +23,7 @@ class DatabaseProductAccess implements ProductAccess
 
         return Entitlement::query()
             ->where('tenant_id', $tenant->id)
-            ->where('product_slug', $product)
+            ->where('product_id', $catalogProduct['id'])
             ->whereIn('status', ['active', 'trial'])
             ->where(fn ($query) => $query->whereNull('starts_at')->orWhere('starts_at', '<=', $now))
             ->where(fn ($query) => $query->whereNull('ends_at')->orWhere('ends_at', '>', $now))

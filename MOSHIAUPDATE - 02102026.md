@@ -8,7 +8,7 @@ Dokumen ini mencatat implementasi aktual, pekerjaan yang masih tertunda, dan kon
 
 Moshia sudah memiliki website utama, autentikasi dengan verifikasi email wajib, dashboard berbeda untuk superadmin/pelanggan, pengelolaan pengguna dan penugasan role melalui admin, serta fondasi Core untuk workspace, katalog produk, dan pemeriksaan hak akses produk. Gmail SMTP sudah berjalan dan email verifikasi sudah diberi desain Moshia.
 
-**Posisi roadmap: Fase 1 — Moshia Core. Moshia belum menjadi platform SaaS lengkap.** Admin memiliki ringkasan platform dan pengelolaan pengguna/role. CRUD produk, paket, subscription, pembayaran, dan fungsi bisnis keempat produk belum diimplementasikan.
+**Posisi roadmap: Fase 1 — Moshia Core. Moshia belum menjadi platform SaaS lengkap.** Admin memiliki ringkasan platform, pengelolaan pengguna/role, serta editor katalog empat produk berbasis database. Pembuatan/penghapusan produk, paket, subscription, pembayaran, dan fungsi bisnis keempat produk belum diimplementasikan.
 
 Urutan yang disetujui pengguna: **Core dahulu, lalu Wedding MVP**, kemudian Jastip, Photo Booth, dan Restaurant.
 
@@ -158,7 +158,7 @@ Akun **ekawigunawork@gmail.com** sudah diperiksa pada database lokal: **ID 1, me
 | Memantau pembayaran/langganan platform | Melihat tagihan/langganan sendiri |
 | Mengelola pengaturan dan audit | Menggunakan produk sesuai hak akses |
 
-Pemisahan dashboard dan pengelolaan pengguna/assignment role sudah diimplementasikan. Tabel di atas adalah target platform keseluruhan; pengelolaan anggota workspace, produk/paket, pembayaran, settings, dan audit masih tertunda.
+Pemisahan dashboard, pengelolaan pengguna/assignment role, dan editor katalog sudah diimplementasikan. Tabel di atas adalah target platform keseluruhan; pengelolaan anggota workspace, paket, pembayaran, settings, dan audit masih tertunda.
 
 ## 6. Workspace / Tenancy
 
@@ -188,9 +188,15 @@ Catatan: relasi pemilik saat ini memakai cascade deletion. Sebelum peluncuran be
 
 ### Sudah dikerjakan
 
-- Registri empat produk di `config/moshia.php`.
+- Registri empat produk sekarang berada di tabel `core_products`; `config/moshia.php` hanya menyimpan pilihan status/ikon editor.
 - Service ProductCatalog sebagai sumber bersama untuk landing, dashboard, dan admin.
-- Status semua produk masih `planned`, ditampilkan sebagai segera hadir pada dashboard/admin.
+- Data awal empat produk tetap `planned` (Segera hadir), dengan identitas `wedding`, `jastip`, `photobooth`, dan `restaurant`. Admin dapat memilih `hidden` (Disembunyikan); belum ada status produk aktif/diluncurkan.
+- `/admin/products` menampilkan katalog termasuk produk tersembunyi, dengan halaman edit `/admin/products/{product}/edit` dan penyimpanan PATCH `/admin/products/{product}`.
+- Admin terverifikasi dapat mengubah nama, ringkasan, deskripsi, ikon, urutan, serta status tampilan. Dilindungi middleware admin, ProductPolicy, validasi panjang/ikon/status/urutan, dan throttle penyimpanan 30 per menit.
+- ID angka, slug produk, serta fase roadmap tidak bisa diubah lewat form/API agar referensi entitlement tetap stabil.
+- Urutan lebih kecil tampil lebih dahulu; nilai sama diurutkan berdasarkan slug. Editor menyediakan pratinjau konten.
+- Produk tersembunyi tidak ditampilkan di landing/dashboard pelanggan, tetapi tetap terlihat dan dihitung di admin. Menyembunyikan kartu tidak mencabut entitlement; ProductCatalog::find tetap mengenali ID tersembunyi.
+- Landing dan dashboard menyediakan pesan jika seluruh produk disembunyikan. Menu Katalog Produk tersedia di desktop/mobile, dan intended redirect admin mendukung editor katalog.
 - Tabel `core_entitlements`.
 - Contract ProductAccess dan implementasi database.
 - Pemeriksaan keanggotaan workspace, produk, status `active`/`trial`, tanggal mulai dan akhir.
@@ -199,13 +205,25 @@ Catatan: relasi pemilik saat ini memakai cascade deletion. Sebelum peluncuran be
 
 ### Belum dikerjakan
 
-- CRUD katalog melalui admin.
+- Pembuatan/penghapusan produk baru dan lifecycle peluncuran. Editor saat ini mengelola empat produk roadmap yang sudah ada, bukan membuat fitur bisnis hanya dengan menambah entri.
 - Endpoint pemberian entitlement oleh billing/admin yang terotorisasi.
 - Kuota pemakaian dan pencatatan konsumsi atomik.
 - Hubungan entitlement dengan paket dan subscription.
 - Route bisnis produk yang menggunakan pemeriksaan akses tersebut.
 
 Entitlement adalah fondasi akses, **bukan bukti pembayaran sudah terintegrasi atau produk sudah dapat digunakan**.
+
+### Pembaruan identitas produk: ID angka + slug
+
+- Sesuai pilihan pengguna, core_products sekarang menggunakan id BIGINT UNSIGNED AUTO_INCREMENT sebagai primary key dan slug VARCHAR(50) dengan unique index.
+- Migration 2026_10_02_000003_separate_product_id_and_slug mengubah ID string lama menjadi slug dan menambahkan ID angka. Migration awal tetap dipertahankan agar perangkat/database lama dapat di-upgrade normal.
+- Migration sudah diterapkan pada MySQL lokal. Konten katalog (termasuk timestamp/status/urutan) dibandingkan sebelum/sesudah dan tetap sama; isi entitlement juga tetap sama.
+- Hasil ID lokal: 1 = jastip, 2 = photobooth, 3 = restaurant, 4 = wedding. Nomor dapat berbeda pada database lain; jangan hardcode nomor berdasarkan contoh ini.
+- Model memakai ID angka; binding URL editor tetap berdasarkan slug, sehingga /admin/products/wedding/edit masih valid. Anchor landing dan ProductAccess juga memakai slug.
+- core_entitlements.product_slug tetap dipertahankan pada perubahan ini; belum dimigrasikan menjadi foreign key product_id. Relasi numerik dapat ditambahkan pada tahap billing berikutnya dengan migration tersendiri.
+- ID dan slug tidak dapat diedit dari form katalog. Urutan tampilan tetap ditentukan sort_order, kemudian slug, bukan angka ID.
+- Seluruh suite setelah perubahan: **99 tes lulus, 801 assertions**. Tes SQLite mencakup ID otomatis, keunikan slug, dan migrasi maju/mundur dengan konten yang telah diedit.
+- Build setelah approval berhasil (794 modul). Tampilan langsung di browser belum diperiksa ulang setelah pemisahan ID/slug.
 
 ## 8. Struktur modul saat ini
 
@@ -214,6 +232,10 @@ app/Modules/Core/
 ├── Catalog/
 │   ├── ProductCatalog.php
 │   ├── DashboardDestination.php
+│   ├── Models/Product.php
+│   ├── Policies/ProductPolicy.php
+│   ├── Http/Requests/UpdateProductRequest.php
+│   ├── Http/Controllers/ProductController.php
 │   ├── Http/Controllers/DashboardController.php
 │   └── Routes/web.php
 ├── Tenancy/
@@ -305,6 +327,8 @@ Migration `2026_10_02_000001_create_core_workspace_tables` sudah dijalankan pada
 - `core_tenant_user`
 - `core_entitlements`
 
+Migration katalog `2026_10_02_000002_create_core_products_table` juga sudah dijalankan pada MySQL lokal. Tabel `core_products` diisi empat produk awal, seluruhnya `planned`, dengan urutan 10/20/30/40. Jumlah baris akun, workspace, keanggotaan, dan entitlement diperiksa sebelum/sesudah dan tetap sama. Migration normal berikutnya tidak menimpa edit katalog yang sudah tersimpan.
+
 Koneksi MySQL sempat ditolak karena layanan belum tersambung; pengguna mengaktifkannya dan migration berhasil. Tidak dilakukan reset database atau penghapusan data lama.
 
 Riwayat validasi:
@@ -320,8 +344,9 @@ Riwayat validasi:
 - Verifikasi email wajib: seluruh suite **79 tes lulus, 553 assertions**. Build halaman registrasi/verifikasi berhasil setelah approval, 792 modul ditransformasikan.
 - Gmail SMTP: koneksi dan autentikasi berhasil setelah konfigurasi diperbaiki. Pengguna mengonfirmasi alur registrasi → inbox → verifikasi berhasil secara nyata.
 - Setelah desain email terbaru: **14 tes terkait registrasi/verifikasi lulus, 94 assertions**, serta rendering HTML/plain text melalui mailer array berhasil. Tidak ada email nyata dikirim oleh pemeriksaan rendering tersebut.
-- Seluruh suite belum diulang setelah perubahan khusus desain email; tes terkait di atas sudah lulus. Build tidak dijalankan untuk template email karena tidak diperlukan.
-- Tidak ada migration baru, reset database, atau pemberian role massal selama tahap dashboard/admin/verifikasi email ini.
+- Pada tahap desain email, hanya tes terkait yang diulang dan build tidak diperlukan. Seluruh suite kemudian dijalankan lagi pada tahap katalog berikutnya.
+- Tidak ada reset database atau pemberian role massal selama tahap dashboard/admin/verifikasi email. Migration baru hanya ditambahkan pada tahap katalog berikutnya seperti dijelaskan di atas.
+- Tahap katalog database/admin: seluruh suite **97 tes lulus, 794 assertions**, termasuk 18 skenario katalog (akses, validasi, konsistensi tampilan, urutan, visibility, kestabilan entitlement, dan redirect). Build setelah approval berhasil, 794 modul ditransformasikan. Tampilan editor katalog belum diperiksa langsung di browser.
 - `git diff --check` sebelumnya lulus. Tampilan dashboard/admin dan email terbaru belum diuji visual menyeluruh; jangan menyatakan seluruh fitur diuji end-to-end.
 
 ## 12. File penting untuk melanjutkan
@@ -339,7 +364,11 @@ Riwayat validasi:
 | `app/Modules/Core/Identity/` | Controller, request, policy, action, dan route pengelolaan pengguna |
 | `app/Http/Controllers/Auth/{EmailVerificationPromptController,EmailVerificationNotificationController,VerifyEmailController}.php` | Halaman, kirim ulang, dan pemrosesan verifikasi |
 | `database/seeders/RoleSeeder.php` | Role user/super-admin untuk web |
-| `config/moshia.php` | Katalog produk bersama |
+| `config/moshia.php` | Pilihan ikon/status editor; konten produk ada di database |
+| `app/Modules/Core/Catalog/{Models,Policies,Http}/` | Model produk, policy, request, controller editor katalog |
+| `database/migrations/2026_10_02_000002_create_core_products_table.php` | Tabel katalog dan snapshot empat produk awal |
+| `resources/js/Pages/Admin/Products/{Index,Edit}.vue` | Daftar dan editor katalog dengan pratinjau |
+| `tests/Feature/Core/ProductManagementTest.php` | Pengujian pengelolaan katalog dan konsistensi data |
 | `resources/js/Layouts/MoshiaLayout.vue` | Sidebar dan kerangka dashboard/profil/admin |
 | `resources/js/Pages/Dashboard.vue` | Dashboard pelanggan/workspace |
 | `resources/js/Pages/Admin/Index.vue` | Ringkasan admin saat ini |
@@ -364,14 +393,14 @@ Riwayat validasi:
 ## 13. Prioritas lanjutan
 
 1. Periksa tampilan email verifikasi baru di inbox; tinjau dashboard/admin pada desktop dan mobile jika diperlukan.
-2. Lanjutan Core yang disarankan: pengelolaan katalog produk dan paket melalui admin. Ini belum diimplementasikan dan belum ada keputusan detail paket/harga.
+2. Katalog database dan edit empat produk melalui admin sudah dibuat. Lanjutan Core yang disarankan: pengelolaan paket produk; detail paket/harga belum disepakati.
 3. Sepakati role anggota workspace, kebijakan kepemilikan/penghapusan, paket/harga, trial, kuota, mata uang, serta provider pembayaran.
 4. Lengkapi billing, subscription, entitlement dari pembayaran terverifikasi, invoice dan audit.
 5. Lengkapi notifikasi, media, queue, kebutuhan operasional minimum, serta migrasi email domain saat siap.
 6. Bangun satu Wedding vertical slice: template → isi konten → preview → publish, sampai bisa dipakai dan diuji end-to-end.
 7. Lanjutkan Jastip, Photo Booth, Restaurant sesuai roadmap. Pembuatan definisi role/permission dan pengelolaan anggota masih pekerjaan tersendiri, bukan fitur yang otomatis selesai dengan assignment role admin.
 
-Permintaan terakhir pengguna adalah **memperbarui dokumen progres ini**, setelah desain email disesuaikan. Jangan otomatis menganggap pekerjaan katalog/billing sudah diminta atau selesai.
+Permintaan terakhir pengguna adalah memisahkan ID produk menjadi angka dan slug menjadi string. Perubahan sudah diterapkan melalui migration baru tanpa mengubah konten katalog atau entitlement. Editor katalog sudah dibuat; paket dan billing belum dikerjakan.
 
 ## 14. Catatan melanjutkan dari device lain
 
@@ -391,4 +420,4 @@ Permintaan terakhir pengguna adalah **memperbarui dokumen progres ini**, setelah
 
 Pesan pembuka yang dapat digunakan:
 
-> Baca "MOSHIAUPDATE - 02102026.md", docs/ARCHITECTURE.md, dan docs/EMAIL.md. Project aktif ada di MOSHIA-PROJECT dan seluruh pengembangan mengacu blueprint utama. Pemisahan dashboard, admin pengguna/assignment role, verifikasi email wajib, dan Gmail SMTP sudah berjalan. Pengguna sudah menguji registrasi serta verifikasi; desain email Moshia terbaru sudah dirender dan diuji terkait, tetapi belum diperiksa di inbox. Pertahankan desain hitam-merah, stack, dan perubahan yang belum di-commit. Jelaskan alur sebelum implementasi; setiap npm run build/dev wajib approval tool. Jangan menampilkan rahasia .env, mereset database, atau memberikan role tanpa instruksi. Prioritas Core selanjutnya adalah katalog/paket, lalu billing dan Wedding MVP; periksa kondisi aktual sebelum melanjutkan.
+> Baca "MOSHIAUPDATE - 02102026.md", docs/ARCHITECTURE.md, dan docs/EMAIL.md. Project aktif ada di MOSHIA-PROJECT dan seluruh pengembangan mengacu blueprint utama. Pemisahan dashboard, admin pengguna/assignment role, katalog database/editor admin, verifikasi email wajib, dan Gmail SMTP sudah berjalan. Pengguna sudah menguji registrasi serta verifikasi; desain email Moshia terbaru sudah dirender dan diuji terkait, tetapi belum diperiksa di inbox. Katalog menggunakan core_products; config/moshia.php hanya pilihan ikon/status. Pertahankan desain hitam-merah, stack, dan perubahan yang belum di-commit. Jelaskan alur sebelum implementasi; setiap npm run build/dev wajib approval tool. Jangan menampilkan rahasia .env, mereset database, atau memberikan role tanpa instruksi. Prioritas Core selanjutnya adalah paket, lalu billing dan Wedding MVP; periksa kondisi aktual sebelum melanjutkan.

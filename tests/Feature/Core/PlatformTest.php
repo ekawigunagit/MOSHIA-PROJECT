@@ -66,7 +66,7 @@ class PlatformTest extends TestCase
         $this->assertFalse($access->allows($user, $tenant, 'wedding'));
 
         $grant = Entitlement::create([
-            'tenant_id' => $tenant->id, 'product_slug' => 'wedding', 'status' => 'trial',
+            'tenant_id' => $tenant->id, 'product_id' => \App\Modules\Core\Catalog\Models\Product::where('slug', 'wedding')->value('id'), 'status' => 'trial',
             'starts_at' => now()->subDay(), 'ends_at' => now()->addDay(),
         ]);
         $this->assertTrue($access->allows($user, $tenant, 'wedding'));
@@ -88,7 +88,7 @@ class PlatformTest extends TestCase
         $user = User::factory()->create();
         $tenant = app(CreateWorkspace::class)->handle($user, 'Mine');
         $this->actingAs($user)->get('/test-product-access')->assertForbidden();
-        Entitlement::create(['tenant_id' => $tenant->id, 'product_slug' => 'wedding', 'status' => 'active']);
+        Entitlement::create(['tenant_id' => $tenant->id, 'product_id' => \App\Modules\Core\Catalog\Models\Product::where('slug', 'wedding')->value('id'), 'status' => 'active']);
         $this->get('/test-product-access')->assertOk()->assertJson(['tenant' => $tenant->id]);
         $tenant->members()->detach($user->id);
         $this->get('/test-product-access')->assertForbidden();
@@ -97,7 +97,7 @@ class PlatformTest extends TestCase
     public function test_public_landing_uses_shared_product_catalog(): void
     {
         $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
-            ->component('Welcome')->has('products', 4)->where('products.0.id', 'wedding'));
+            ->component('Welcome')->has('products', 4)->where('products.0.slug', 'wedding'));
     }
 
     public function test_guests_cannot_create_workspaces(): void

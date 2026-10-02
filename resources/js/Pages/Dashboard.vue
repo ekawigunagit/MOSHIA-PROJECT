@@ -54,7 +54,7 @@ function selectWorkspace(event) {
 
             <section id="ecosystem" class="scroll-mt-24">
                 <div class="section-heading">
-                    <div><span class="section-kicker">MOSHIA PRODUCTS</span><h2>Empat produk, satu akun.</h2></div>
+                    <div><span class="section-kicker">MOSHIA PRODUCTS</span><h2>Produk Moshia, satu akun.</h2></div>
                 </div>
                 <ProductCatalog :products="products" show-access />
             </section>

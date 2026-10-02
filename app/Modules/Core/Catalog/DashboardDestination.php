@@ -3,6 +3,8 @@
 namespace App\Modules\Core\Catalog;
 
 use App\Models\User;
+use App\Modules\Core\Billing\Models\Plan;
+use App\Modules\Core\Catalog\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
@@ -59,6 +61,23 @@ class DashboardDestination
 
         if ($request->user()->hasRole('super-admin')) {
             $allowed[] = route('admin.index', absolute: false);
+            $plansPath = route('admin.plans.index', absolute: false);
+            $allowed[] = $plansPath;
+            $allowed[] = route('admin.plans.create', absolute: false);
+            if (preg_match('#^'.preg_quote($plansPath, '#').'/([1-9][0-9]*)/edit$#', $path, $matches)) {
+                $plan = Plan::find($matches[1]);
+                if ($plan && $request->user()->can('update', $plan)) {
+                    $allowed[] = $path;
+                }
+            }
+            $productsPath = route('admin.products.index', absolute: false);
+            $allowed[] = $productsPath;
+            if (preg_match('#^'.preg_quote($productsPath, '#').'/([a-z0-9-]+)/edit$#', $path, $matches)) {
+                $product = Product::where('slug', $matches[1])->first();
+                if ($product && $request->user()->can('update', $product)) {
+                    $allowed[] = $path;
+                }
+            }
             $usersPath = route('admin.users.index', absolute: false);
             $allowed[] = $usersPath;
             if (preg_match('#^'.preg_quote($usersPath, '#').'/([1-9][0-9]*)/edit$#', $path, $matches)) {
