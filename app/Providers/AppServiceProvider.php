@@ -12,7 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            \App\Modules\Core\Entitlement\Contracts\ProductAccess::class,
+            \App\Modules\Core\Entitlement\Services\DatabaseProductAccess::class,
+        );
     }
 
     /**

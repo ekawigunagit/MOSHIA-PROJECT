@@ -46,6 +46,9 @@ class RegisteredUserController extends Controller
             ]);
 
             $user->assignRole('user');
+            app(\App\Modules\Core\Tenancy\Actions\CreateWorkspace::class)->handle(
+                $user, \Illuminate\Support\Str::limit($user->name, 80, '').' Workspace'
+            );
 
             return $user;
         });

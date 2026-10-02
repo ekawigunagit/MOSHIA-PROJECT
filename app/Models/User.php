@@ -11,16 +11,19 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles;
-
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
+    public function tenants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Modules\Core\Tenancy\Models\Tenant::class, 'core_tenant_user')->withTimestamps();
+    }
+
     protected $fillable = [
         'name',
         'email',

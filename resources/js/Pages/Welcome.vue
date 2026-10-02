@@ -1,20 +1,15 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import MoshiaIcon from '@/Components/MoshiaIcon.vue';
 import ThemeToggle from '@/Components/ThemeToggle.vue';
 import ScrollToTop from '@/Components/ScrollToTop.vue';
-defineProps({ canLogin: Boolean, canRegister: Boolean });
+const props = defineProps({ canLogin: Boolean, canRegister: Boolean, products: { type: Array, default: () => [] } });
 const menuOpen = ref(false);
 const menuButton = ref(null);
 const activeSection = ref('home');
 const sections = [['home', 'Beranda'], ['ecosystem', 'Ekosistem'], ['about', 'Tentang Kami'], ['explore', 'Eksplorasi']];
-const features = [
- { id: 'products', icon: 'chip', title: 'Digital Products', summary: 'Ide yang menjadi solusi. Produk digital untuk kebutuhan nyata.', description: 'Dari kebutuhan sehari-hari hingga ide besar berikutnya. Kami mengembangkan pengalaman digital yang sederhana, relevan, dan mudah digunakan.' },
- { id: 'solutions', icon: 'bolt', title: 'Smart Solutions', summary: 'Sederhanakan proses, buka lebih banyak kemungkinan.', description: 'Memberi ruang untuk fokus pada hal yang penting, melalui solusi yang membantu alur kerja menjadi lebih teratur dan efisien.' },
- { id: 'creative', icon: 'chart', title: 'Creative & Technology', summary: 'Kreativitas dan teknologi untuk menghadirkan dampak.', description: 'Memadukan desain yang bermakna dengan teknologi untuk mengubah ide menjadi pengalaman digital yang berkesan.' },
- { id: 'connected', icon: 'link', title: 'Connected Ecosystem', summary: 'Saling terhubung, saling mendukung, tumbuh bersama.', description: 'Sebuah ruang tempat produk, ide, dan kolaborasi bertemu. Karena peluang baru tumbuh ketika kita saling terhubung.' }
-];
+const features = computed(() => props.products);
 
 function onScroll() { for (const [id] of sections) { if (document.getElementById(id)?.getBoundingClientRect().top <= window.innerHeight * .4) activeSection.value = id; } }
 function escapeMenu(event) { if (event.key === 'Escape' && menuOpen.value) { menuOpen.value = false; menuButton.value?.focus(); } }

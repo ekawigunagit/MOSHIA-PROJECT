@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Modules\Core\Tenancy\Actions;
+
+use App\Models\User;
+use App\Modules\Core\Tenancy\Models\Tenant;
+use Illuminate\Support\Facades\DB;
+
+class CreateWorkspace
+{
+    public function handle(User $owner, string $name): Tenant
+    {
+        return DB::transaction(function () use ($owner, $name) {
+            $tenant = Tenant::create(['owner_id' => $owner->id, 'name' => $name]);
+            $tenant->members()->attach($owner->id);
+
+            return $tenant;
+        });
+    }
+}

@@ -33,6 +33,8 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $user = User::where('email', 'test@example.com')->firstOrFail();
         $this->assertTrue($user->hasRole('user', 'web'));
+        $this->assertSame(1, $user->tenants()->count());
+        $this->assertSame($user->id, $user->tenants()->first()->owner_id);
         $this->assertFalse($user->hasRole('super-admin', 'web'));
         $response->assertRedirect(route('dashboard', absolute: false));
     }
@@ -62,6 +64,7 @@ class RegistrationTest extends TestCase
             $this->fail('Registration should fail when its required role is missing.');
         } catch (RoleDoesNotExist $exception) {
             $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
+            $this->assertDatabaseCount('core_tenants', 0);
             $this->assertGuest();
         }
     }

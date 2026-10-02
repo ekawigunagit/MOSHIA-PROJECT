@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
+            'product.access' => \App\Modules\Core\Entitlement\Http\Middleware\EnsureProductAccess::class,
             // 'subscribed' => \App\Core\Subscriptions\Http\Middleware\EnsureSubscriptionActive::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
