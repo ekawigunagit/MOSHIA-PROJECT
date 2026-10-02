@@ -26,6 +26,7 @@ class DeleteAccount
                 throw ValidationException::withMessages(['account' => 'Akun masih memiliki workspace. Penghapusan ditolak agar data workspace tetap aman. Pengalihan atau penutupan workspace belum tersedia.']);
             }
 
+            $account->notifications()->delete();
             $account->delete();
         }, 3);
     }

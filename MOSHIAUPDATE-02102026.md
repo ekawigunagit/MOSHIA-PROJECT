@@ -1,3 +1,149 @@
+# MOSHIA — Handoff dan status terbaru
+
+**Diperbarui: 2 Oktober 2026, Asia/Jakarta (UTC+7).**
+
+Dokumen ini adalah rangkuman keputusan percakapan dan hasil implementasi, bukan transkrip kata demi kata. Bagian **Status terkini** di awal adalah acuan utama; bagian riwayat di bawah dipertahankan agar alasan perubahan tidak hilang. Pernyataan lama tentang fitur yang belum ada tidak berlaku jika sudah diperbarui di bagian terkini.
+
+Nama file handoff sekarang: **MOSHIAUPDATE-02102026.md**, tanpa spasi. Pengguna telah mengganti nama file lama; jangan membuat ulang nama lama. Workspace aktif adalah `D:\XAMPP8212\htdocs\MOSHIA-PROJECT`.
+
+## Status terkini — baca bagian ini terlebih dahulu
+
+### A. Arah project dan cara bekerja
+
+- Moshia adalah platform modular monolith Laravel: Core bersama dan empat produk terpisah, bukan microservices sejak awal.
+- Blueprint utama: http://72.62.240.106:8787/moshia-ZquktHzrKNCnAat1/
+- Urutan yang disetujui: **selesaikan Core, lalu Wedding MVP, Jastip, Photo Booth, Restaurant**.
+- Stack dipertahankan: Laravel 12/PHP 8.2, Breeze, Vue 3, Inertia 2, Tailwind 3, Vite, MySQL, Spatie Permission. Node 22.23.3 dipin melalui Volta untuk tidak mengganggu project lain.
+- Desain mengikuti referensi awal hitam-merah, Instrument Sans, robot/logo SVG sementara, responsif, tema terang/gelap, menu mobile, tombol kembali ke atas.
+- Jelaskan alur dalam Bahasa Indonesia sebelum implementasi, lalu lanjutkan pekerjaan yang diminta. Pertanyaan penjelasan bukan izin otomatis mengubah akun/database.
+- **Setiap `npm run build` / `npm run dev` wajib approval lewat tombol tool.** Jangan mengganti dengan perintah lain untuk melewati persetujuan atau membuat izin permanen baru.
+- Jangan reset database, memberikan role, mengubah harga, atau menimpa perubahan pengguna tanpa instruksi yang sesuai.
+- Jangan memasukkan password, App Password Gmail, APP_KEY, atau isi rahasia `.env` ke dokumen/Git.
+- Izin filesystem harus mengikuti lingkungan sesi aktif. Pada sesi terakhir, folder project baru masih memerlukan approval karena writable root tool menunjuk folder lama; catatan izin dari device lain bukan otorisasi otomatis.
+
+### B. Implementasi yang sudah ada
+
+| Area | Kondisi aktual |
+| --- | --- |
+| Website utama | Landing responsif, tema, hero, katalog empat produk, tombol kembali ke atas |
+| Identity | Registrasi/login/logout, profil/password, verifikasi email wajib, redirect menurut role dan intended URL yang diizinkan |
+| Email | Gmail SMTP dan email verifikasi bermerek sudah dikerjakan di device lain; pengiriman nyata tidak diuji ulang pada device lokal ini |
+| Superadmin | Akun ekawigunawork@gmail.com adalah superadmin menurut pemeriksaan device sebelumnya; dashboard `/admin` berbeda dari dashboard pelanggan `/dashboard` |
+| Admin pengguna | Daftar/filter/pagination, edit nama/email, assignment role yang sudah tersedia, policy server, pembatasan perubahan role sendiri |
+| Katalog | Empat produk berbasis `core_products`, editor admin, ID numerik terpisah dari slug string, status/visibility/urutan |
+| Workspace | Pembuatan, keanggotaan pemilik, pemilihan workspace tervalidasi server, akun baru mendapat workspace awal |
+| Keamanan penghapusan | Pemilik workspace dan superadmin terakhir ditolak saat menghapus akun; relasi owner memakai restrict, bukan cascade |
+| Entitlement | Relasi `product_id` ke produk, tenant scope/keanggotaan, status aktif/trial dan waktu berlaku; tanpa bypass superadmin |
+| Draft Paket | Form admin memilih produk, nama dan deskripsi; selalu draft; bukan penjualan aktif |
+| Notifikasi | Lonceng database per akun, badge belum dibaca, daftar/pagination, tandai satu/semua dibaca, refresh berkala dan penanganan error |
+
+Keempat produk masih katalog/roadmap. Belum ada alur operasional Wedding, Jastip, Photo Booth atau Restaurant yang lengkap. Subscription, checkout, invoice, kuota konsumsi, audit platform dan integrasi provider juga belum selesai.
+
+### C. Penjelasan terakhir kepada pengguna: tabel draft paket
+
+Draft paket berada di **`core_plans`**:
+
+| Kolom | Arti |
+| --- | --- |
+| `id` | ID paket |
+| `product_id` | Relasi ke `core_products.id` |
+| `name` | Nama paket |
+| `description` | Deskripsi paket |
+| `status` | Saat ini `draft` |
+| `created_at`, `updated_at` | Waktu pembuatan/pembaruan |
+
+Harga, trial, dan kuota belum menjadi kolom aktif. Pengguna secara eksplisit meminta tetap memakai draft karena harga akan disusun sendiri. **Excel tidak otomatis diimpor ke `core_plans`.** Jangan mengaktifkan harga/pembelian sebelum data dan aturan ditinjau bersama pengguna.
+
+### D. Excel yang sudah diberikan
+
+File: [exports/MOSHIA_DRAFT_PAKET_2026-10-02_194603.xlsx](exports/MOSHIA_DRAFT_PAKET_2026-10-02_194603.xlsx)
+
+- Snapshot saat ekspor: **0 draft paket dan 4 produk**. Ini kondisi saat ekspor, bukan jaminan jumlah saat membuka dokumen di device lain.
+- Sheet `Panduan`: cara pengisian dan batas penggunaan workbook.
+- Sheet `Draft Database`: data asli draft, saat itu kosong selain header.
+- Sheet `Isian Paket`: empat baris TEMPLATE, satu per produk. Identitas produk diisi dari database; nama paket dan harga kosong untuk pengguna tentukan.
+- Sheet `Kuota`: isi batas, satuan, periode dan catatan dengan mengacu `Ref Isian` yang sama.
+- Sel kuning adalah masukan pengguna; tersedia dropdown, validasi angka, filter, freeze header dan wrap text.
+- Kolom isian mencakup nama/deskripsi, cara bayar, mata uang, harga, masa aktif, trial, fitur/dukungan, pajak, catatan dan status keputusan.
+- Baris TEMPLATE bukan paket yang sudah dibuat di database. Angka kosong bukan nol/gratis/unlimited.
+- Belum ada persetujuan memilih sekali bayar, bulanan, tahunan, atau per penggunaan. Pengguna mengisi workbook terlebih dahulu.
+- Struktur XML/ZIP workbook, empat baris produk, dan harga kosong sudah diperiksa; belum diverifikasi visual di Microsoft Excel.
+- Exporter ulang: `scripts/export-draft-plans.ps1`, menggunakan PHP lokal dan .NET ZIP, tanpa dependency tambahan. Menghasilkan file baru bertimestamp Asia/Jakarta. Simpan workbook yang sudah diisi, jangan menggantinya dengan ekspor baru.
+- Windows sempat memblokir script; exporter dijalankan dengan ExecutionPolicy khusus proses setelah approval, tanpa mengubah kebijakan Windows permanen.
+
+### E. Lonceng notifikasi: perilaku dan batasnya
+
+- Tabel Laravel standar: `notifications`, melalui relasi Notifiable pada User.
+- Migration: `2026_10_02_000007_create_notifications_table.php`.
+- Modul: `app/Modules/Core/Notification/`.
+- Action `RecordNotification` menulis notifikasi database dalam transaksi aktivitas.
+- Sumber sekarang: membuat workspace → pemilik; membuat/memperbarui draft paket → admin yang melakukan aksi.
+- Tidak mengirim email/WhatsApp tambahan, tidak membuat notifikasi contoh, dan tidak mengisi ulang aktivitas lama.
+- Akun lama dapat melihat daftar kosong sampai melakukan aktivitas baru yang didukung.
+- Endpoint: GET `/notifications`, PATCH `/notifications/{uuid}/read`, PATCH `/notifications/read-all`.
+- Seluruh query dibatasi ke akun login, termasuk superadmin; mutasi memakai CSRF web dan throttle.
+- Daftar 10 item/halaman, badge unread, baca satu/semua, empty/loading/error/retry, Escape/klik luar, pengelolaan fokus, responsive light/dark.
+- Refresh saat mount/buka panel/navigasi, tab kembali terlihat, dan setiap 60 detik selama tab terlihat. **Polling, bukan WebSocket push.**
+- Penghapusan akun yang diizinkan membersihkan notifikasi akun itu di transaksi yang sama.
+- Belum ada fitur hapus notifikasi individual, broadcast admin, preferensi kanal, atau integrasi email/WhatsApp umum; tidak diminta pada tahap ini.
+- Dokumentasi: [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md).
+
+### F. Masalah lintas device yang telah diselesaikan
+
+1. **Migration MySQL error 1553**: unique index `(tenant_id, product_slug)` masih menopang foreign key tenant sehingga tidak bisa dihapus langsung. Migration 000005 sudah diperbaiki dengan index tenant independen, constraint baru sebelum penghapusan lama, serta pemeriksaan kondisi parsial agar dapat dilanjutkan setelah kolom `product_id` terlanjur dibuat. Rollback dan pemetaan data turut diuji. Slug tidak dikenal tetap menghentikan proses, tidak dihapus diam-diam.
+2. Migration 000005 dan 000006 berhasil diterapkan pada MySQL lokal sebagai batch 5, tanpa `migrate:fresh` atau reset data.
+3. **Build lokal tertinggal dari source device lain**: manifest belum memuat halaman admin Pengguna, Produk dan Draft Paket. Build dengan approval sudah menyelaraskan aset; seluruh halaman Vue diperiksa hadir dalam manifest saat audit tersebut.
+4. **Warna profil tidak konsisten**: kartu/form/modal mengikuti token tema; ThemeToggle menyinkronkan kelas `dark`, `data-theme`, dan preferensi tersimpan.
+5. **Migration notifikasi**: 000007 berhasil, batch 6. Pemeriksaan terakhir seluruh migration 000000–000007 yang tersedia berstatus Ran, tidak ada pending.
+
+Nomor batch dan kondisi database ini hanya hasil lokal terakhir. Device tujuan perlu memeriksa database miliknya sendiri.
+
+### G. Hasil verifikasi terakhir
+
+- Setelah perbaikan migration dan progres device lain: **121 tes, 954 assertions lulus**.
+- Setelah implementasi notifikasi: **128 tes, 990 assertions lulus**; mencakup isolasi antar-akun, idempotensi tandai dibaca, transaksi notifikasi, sumber aktivitas, dan cleanup akun.
+- Migration notifikasi sukses pada MySQL lokal.
+- Build terakhir setelah approval sukses: **796 modul ditransformasikan**.
+- `git diff --check` dan pemeriksaan struktur workbook berhasil pada tahap pengerjaan.
+- Pengujian otomatis menggunakan SQLite in-memory; bukan bukti seluruh concurrency MySQL sudah diuji.
+- Browser end-to-end, tampilan Excel, email nyata pada device ini, dan integrasi provider belum diuji menyeluruh. Jangan mengklaim platform siap produksi penuh.
+- Pembuatan update dokumen ini tidak menjalankan build/dev atau mengirim email.
+
+### H. Tugas berikutnya yang tepat
+
+1. Pengguna mengisi workbook paket dan kuota. Tinjau hasilnya sebelum memperluas skema paket.
+2. Sepakati harga, cara bayar, mata uang, masa aktif, trial, kuota dan pajak; jangan mengarang nilai untuk mengisi kekosongan.
+3. Lengkapi editor aturan paket, lalu subscription workspace dan hubungan lifecycle-nya dengan entitlement.
+4. Pilih provider pembayaran; implementasikan verifikasi webhook, idempotency, invoice dan aktivasi akses berdasarkan pembayaran terverifikasi.
+5. Lengkapi audit, media/upload, operasional queue/notifikasi sesuai kebutuhan Core.
+6. Lanjut Wedding MVP setelah fondasi akses/paket yang diperlukan siap, lalu produk lain sesuai blueprint.
+
+Jangan membuat ulang pemisahan dashboard, admin pengguna/katalog, verifikasi wajib, atau lonceng: fitur tersebut sudah ada. Draft Paket sekarang juga sudah ada; yang belum adalah aturan komersial dan billing.
+
+### I. File untuk dibawa dan diperiksa pada device lain
+
+- Dokumen utama ini, source terbaru, migration, tes, `composer.lock`, `package-lock.json`, dan workbook Excel terutama jika sudah diisi.
+- Modul baru notifikasi, komponen NotificationBell, perubahan PlanController/CreateWorkspace/DeleteAccount, migration 000007, dan tes NotificationTest.
+- Perbaikan migration 000005 serta EntitlementProductRelationTest jangan tertinggal.
+- `git status` saat penyiapan dokumen masih menunjukkan file modified/untracked. Nama dokumen lama tercatat deleted dan nama baru untracked. Belum dilakukan commit/push otomatis.
+- `.env`, database dan upload tidak otomatis berpindah dengan Git. Pindahkan rahasia secara aman; jangan menempelkannya di chat/dokumen.
+- Jika memindahkan database berisi data terenkripsi, pertahankan APP_KEY dengan aman dan sesuaikan APP_URL untuk verifikasi email.
+- Buka folder project yang benar sebagai workspace; pasang dependensi dari lockfile dan gunakan Volta sesuai pin.
+- Cek `php artisan migrate:status`, lalu migration normal pada database yang benar jika pending; jangan `migrate:fresh`.
+- Build/dev hanya setelah approval tool. Build artifacts lokal mungkin tidak ikut Git sehingga device baru perlu build setelah persetujuan.
+- Uji login superadmin/pelanggan, verifikasi, admin paket, buat workspace, lonceng, tema, dan tampilan mobile.
+- `docs/ARCHITECTURE.md` serta ringkasan lama dapat memuat paragraf historis yang belum diselaraskan (misalnya slug entitlement, cascade owner, notifikasi belum tersedia). Gunakan kode aktual dan bagian terkini dokumen ini sebagai acuan; jangan membatalkan perbaikan berdasarkan catatan lama.
+
+### J. Pesan pembuka untuk sesi/device berikutnya
+
+> Baca MOSHIAUPDATE-02102026.md bagian Status terkini, lalu periksa kode dan database yang sedang aktif. Project Moshia memakai Laravel/Breeze/Vue/Inertia, Core dahulu lalu Wedding. Dashboard superadmin/pelanggan, admin pengguna/katalog, verifikasi email wajib, Draft Paket, perlindungan akun, entitlement product_id, dan lonceng notifikasi sudah dibuat. Migration lokal terakhir sudah sampai 000007; suite terakhir 128 tes/990 assertions lulus. Excel paket ada di exports dan pengguna akan mengisi harga; jangan mengaktifkan harga atau mengimpor Excel otomatis. Pertahankan perubahan yang belum di-commit, jelaskan proses, dan gunakan tombol approval setiap npm run build/dev. Lanjutkan dari data workbook/permintaan terbaru pengguna, bukan membangun ulang fitur yang sudah selesai.
+
+---
+
+# Riwayat percakapan dan implementasi sebelumnya
+
+Bagian di bawah adalah catatan bertahap yang dipertahankan. Jika bertentangan, bagian Status terkini di atas berlaku sebagai ringkasan terbaru.
+
 # UPDATE MOSHIA
 
 Tanggal update: **2 Oktober 2026 (Asia/Bangkok, UTC+7)**.
@@ -420,4 +566,37 @@ Permintaan terakhir pengguna adalah memisahkan ID produk menjadi angka dan slug 
 
 Pesan pembuka yang dapat digunakan:
 
-> Baca "MOSHIAUPDATE - 02102026.md", docs/ARCHITECTURE.md, dan docs/EMAIL.md. Project aktif ada di MOSHIA-PROJECT dan seluruh pengembangan mengacu blueprint utama. Pemisahan dashboard, admin pengguna/assignment role, katalog database/editor admin, verifikasi email wajib, dan Gmail SMTP sudah berjalan. Pengguna sudah menguji registrasi serta verifikasi; desain email Moshia terbaru sudah dirender dan diuji terkait, tetapi belum diperiksa di inbox. Katalog menggunakan core_products; config/moshia.php hanya pilihan ikon/status. Pertahankan desain hitam-merah, stack, dan perubahan yang belum di-commit. Jelaskan alur sebelum implementasi; setiap npm run build/dev wajib approval tool. Jangan menampilkan rahasia .env, mereset database, atau memberikan role tanpa instruksi. Prioritas Core selanjutnya adalah paket, lalu billing dan Wedding MVP; periksa kondisi aktual sebelum melanjutkan.
+> Baca "MOSHIAUPDATE-02102026.md", docs/ARCHITECTURE.md, dan docs/EMAIL.md. Project aktif ada di MOSHIA-PROJECT dan seluruh pengembangan mengacu blueprint utama. Pemisahan dashboard, admin pengguna/assignment role, katalog database/editor admin, verifikasi email wajib, dan Gmail SMTP sudah berjalan. Pengguna sudah menguji registrasi serta verifikasi; desain email Moshia terbaru sudah dirender dan diuji terkait, tetapi belum diperiksa di inbox. Katalog menggunakan core_products; config/moshia.php hanya pilihan ikon/status. Pertahankan desain hitam-merah, stack, dan perubahan yang belum di-commit. Jelaskan alur sebelum implementasi; setiap npm run build/dev wajib approval tool. Jangan menampilkan rahasia .env, mereset database, atau memberikan role tanpa instruksi. Prioritas Core selanjutnya adalah paket, lalu billing dan Wedding MVP; periksa kondisi aktual sebelum melanjutkan.
+
+## 15. Update sinkronisasi device lokal — 2 Oktober 2026 (Asia/Jakarta)
+
+Bagian ini memperbarui status historis di atas berdasarkan kode yang dibawa dari device lain:
+
+- Perlindungan penghapusan pemilik workspace dan superadmin terakhir sudah diimplementasikan dan tesnya lulus.
+- Draft Paket admin sudah tersedia: memilih produk, nama, dan deskripsi. Harga, trial, kuota, publish, serta pembelian belum diaktifkan.
+- Entitlement sekarang memakai foreign key product_id numerik, bukan product_slug.
+- Migration 000005 sempat gagal pada MySQL error 1553 karena unique index lama masih menopang foreign key tenant_id. Kolom product_id sudah terbentuk dari percobaan parsial.
+- Migration diperbaiki dengan index tenant_id independen, pemasangan constraint pengganti sebelum menghapus yang lama, serta pemeriksaan kolom/index/foreign key agar bisa dilanjutkan setelah kegagalan parsial. Jalur rollback juga diperbaiki. Slug tidak dikenal tetap menghentikan migrasi; tidak dibuang diam-diam.
+- Seluruh suite lokal lulus: 121 tes, 954 assertions. Termasuk tes pengulangan/pemulihan migration, pemetaan data lama, Draft Paket, dan perlindungan akun. Tes SQLite tidak menggantikan pengujian concurrency MySQL.
+- Migration 000005 dan 000006 berhasil diterapkan di MySQL lokal (batch 5). Seluruh migration berstatus Ran. Tidak menjalankan migrate:fresh atau mereset database.
+- Tidak ada perubahan frontend pada perbaikan migration ini; npm build/dev tidak dijalankan.
+- SMTP Gmail dan tampilan inbox tidak diuji ulang pada device ini. Jangan menganggap konfigurasi rahasia dari device lain otomatis terbawa.
+- Folder aktif tetap MOSHIA-PROJECT. Berbeda dari catatan lingkungan device sebelumnya, tool sesi lokal ini masih membatasi writable workspace ke lokasi lama sehingga perubahan file meminta approval filesystem.
+
+Prioritas berikutnya: lanjutkan Core dari Draft Paket yang sudah ada; sepakati harga, trial, kuota, mata uang, dan provider sebelum mengaktifkan billing/pembelian. Pemisahan dashboard dan admin pengguna/katalog sudah selesai sebelumnya, jangan dibuat ulang dari ringkasan lama.
+## 16. Lonceng notifikasi dan Excel draft paket — 2 Oktober 2026
+
+- Lonceng sudah berfungsi: daftar 10 notifikasi per halaman, badge belum dibaca, tandai satu/semua dibaca, pagination, empty/loading/error state dan retry, tutup dengan Escape/klik luar, tema terang/gelap dan tampilan mobile.
+- Data disimpan di tabel notifications. Endpoint memeriksa akun pemilik pada setiap query; superadmin tidak boleh membaca/menandai notifikasi akun lain. Tidak ada email/WhatsApp tambahan dari fitur ini.
+- Sumber notifikasi: pembuatan workspace untuk pemiliknya, serta pembuatan/perubahan draft paket untuk admin yang melakukan aksi. Pencatatan berada dalam transaksi aktivitas; tidak ada notifikasi palsu atau backfill aktivitas lama.
+- Pemutakhiran dilakukan saat membuka panel/navigasi dan polling setiap 60 detik selama tab terlihat. Ini bukan WebSocket push.
+- Penghapusan akun yang diizinkan juga membersihkan notifikasi akun tersebut di dalam transaksi.
+- Migration 000007_create_notifications_table berhasil diterapkan pada database lokal.
+- Seluruh suite lulus: 128 tes, 990 assertions. Build setelah approval berhasil; 796 modul ditransformasikan. Tampilan browser belum diperiksa langsung.
+- Dokumentasi teknis: docs/NOTIFICATIONS.md.
+- Ekspor: exports/MOSHIA_DRAFT_PAKET_2026-10-02_194603.xlsx. Terdapat sheet Panduan, Draft Database, Isian Paket, Kuota.
+- Saat ekspor, database memiliki 0 draft paket dan 4 produk. Sheet Draft Database kosong selain header; Isian Paket berisi satu TEMPLATE per produk, bukan paket yang dibuat di database. Nama paket, harga, mata uang, trial, durasi dan kuota dibiarkan untuk pengguna tentukan.
+- Workbook memiliki header, filter, freeze row, sel input kuning, dropdown serta validasi angka. Struktur XML/ZIP, empat baris produk dan harga kosong sudah diperiksa; belum dibuka secara visual di Microsoft Excel.
+- Harga tetap belum diaktifkan di aplikasi. File Excel tidak mengimpor data secara otomatis dan tidak membuat paket database.
+- Exporter dapat digunakan ulang: scripts/export-draft-plans.ps1 (Windows PowerShell + PHP lokal). Mengambil snapshot produk/draft terkini, menghasilkan file baru bertimestamp Asia/Jakarta, dan tidak menimpa workbook yang sudah diisi.
+- Prioritas berikutnya: pengguna mengisi workbook, kemudian tinjau model penagihan/harga/durasi/trial/kuota sebelum memperluas Draft Paket dan billing.

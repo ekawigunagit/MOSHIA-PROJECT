@@ -38,14 +38,26 @@ class PlanController extends Controller
 
     public function store(SavePlanRequest $request): RedirectResponse
     {
-        $plan = Plan::create($request->safe()->only(['product_id', 'name', 'description']));
+        $plan = \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $plan = Plan::create($request->safe()->only(['product_id', 'name', 'description']));
+            app(\App\Modules\Core\Notification\Actions\RecordNotification::class)->handle(
+                $request->user(), 'Draft paket dibuat', 'Draft "'.$plan->name.'" berhasil disimpan. Paket belum dipublikasikan.'
+            );
+
+            return $plan;
+        });
 
         return to_route('admin.plans.edit', $plan)->with('success', 'Draft paket berhasil dibuat.');
     }
 
     public function update(SavePlanRequest $request, Plan $plan): RedirectResponse
     {
-        $plan->update($request->safe()->only(['product_id', 'name', 'description']));
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $plan) {
+            $plan->update($request->safe()->only(['product_id', 'name', 'description']));
+            app(\App\Modules\Core\Notification\Actions\RecordNotification::class)->handle(
+                $request->user(), 'Draft paket diperbarui', 'Perubahan draft "'.$plan->name.'" berhasil disimpan. Harga belum diaktifkan.'
+            );
+        });
 
         return to_route('admin.plans.edit', $plan)->with('success', 'Draft paket berhasil diperbarui.');
     }

@@ -15,6 +15,9 @@ class CreateWorkspace
             $owner = User::lockForUpdate()->findOrFail($owner->id);
             $tenant = Tenant::create(['owner_id' => $owner->id, 'name' => $name]);
             $tenant->members()->attach($owner->id);
+            app(\App\Modules\Core\Notification\Actions\RecordNotification::class)->handle(
+                $owner, 'Workspace berhasil dibuat', 'Workspace "'.$tenant->name.'" siap digunakan.'
+            );
 
             return $tenant;
         });

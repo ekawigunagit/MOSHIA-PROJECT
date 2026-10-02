@@ -48,6 +48,23 @@ class EntitlementProductRelationTest extends TestCase
         }
     }
 
+    public function test_migration_resumes_after_product_id_was_added_and_can_be_repeated(): void
+    {
+        $tenant = app(CreateWorkspace::class)->handle(User::factory()->create(), 'Retry');
+        $product = Product::where('slug', 'wedding')->firstOrFail();
+        $grant = Entitlement::create(['tenant_id' => $tenant->id, 'product_id' => $product->id, 'status' => 'trial']);
+        $before = (array) DB::table('core_entitlements')->where('id', $grant->id)->first();
+        $migration = require database_path('migrations/2026_10_02_000005_link_entitlements_to_product_ids.php');
+        $migration->down();
+        $migration->down();
+        Schema::table('core_entitlements', fn (\Illuminate\Database\Schema\Blueprint $table) => $table->unsignedBigInteger('product_id')->nullable());
+        DB::table('core_entitlements')->where('id', $grant->id)->update(['product_id' => $product->id]);
+        $migration->up();
+        $migration->up();
+        $this->assertEquals($before, (array) DB::table('core_entitlements')->where('id', $grant->id)->first());
+        $this->assertTrue(Schema::hasIndex('core_entitlements', 'core_entitlements_tenant_id_index'));
+        $this->assertFalse(Schema::hasColumn('core_entitlements', 'product_slug'));
+    }
     public function test_referenced_product_cannot_be_deleted(): void
     {
         $tenant = app(CreateWorkspace::class)->handle(User::factory()->create(), 'Protected');
