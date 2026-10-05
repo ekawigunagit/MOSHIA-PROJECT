@@ -22,6 +22,18 @@ class SavePlanRequest extends FormRequest
             'name' => ['required', 'string', 'max:100', Rule::unique('core_plans', 'name')
                 ->where('product_id', $this->input('product_id'))->ignore($this->route('plan')?->id)],
             'description' => ['nullable', 'string', 'max:5000'],
+            'commercial_terms' => ['prohibited'],
+            'wedding_package' => [
+                'nullable',
+                'string',
+                Rule::in(array_keys(config('wedding_plans.packages', []))),
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    $productId = $this->input('product_id');
+                    if (! is_scalar($productId) || ! \App\Modules\Core\Catalog\Models\Product::whereKey($productId)->where('slug', 'wedding')->exists()) {
+                        $fail('Aturan paket Wedding hanya dapat digunakan untuk produk Wedding.');
+                    }
+                },
+            ],
             'status' => ['prohibited'],
             'price' => ['prohibited'],
             'price_amount' => ['prohibited'],

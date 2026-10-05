@@ -10,9 +10,14 @@ class Plan extends Model
 {
     protected $table = 'core_plans';
 
-    protected $fillable = ['product_id', 'name', 'description'];
+    protected $fillable = ['product_id', 'name', 'description', 'commercial_terms'];
 
     protected $attributes = ['status' => 'draft'];
+
+    protected function casts(): array
+    {
+        return ['commercial_terms' => 'array'];
+    }
 
     public function product(): BelongsTo
     {

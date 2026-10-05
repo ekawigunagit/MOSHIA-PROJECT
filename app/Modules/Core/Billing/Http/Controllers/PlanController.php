@@ -39,7 +39,7 @@ class PlanController extends Controller
     public function store(SavePlanRequest $request): RedirectResponse
     {
         $plan = \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-            $plan = Plan::create($request->safe()->only(['product_id', 'name', 'description']));
+            $plan = Plan::create(app(\App\Modules\Core\Billing\Actions\DraftPlanAttributes::class)->build($request->validated()));
             app(\App\Modules\Core\Notification\Actions\RecordNotification::class)->handle(
                 $request->user(), 'Draft paket dibuat', 'Draft "'.$plan->name.'" berhasil disimpan. Paket belum dipublikasikan.'
             );
@@ -53,7 +53,7 @@ class PlanController extends Controller
     public function update(SavePlanRequest $request, Plan $plan): RedirectResponse
     {
         \Illuminate\Support\Facades\DB::transaction(function () use ($request, $plan) {
-            $plan->update($request->safe()->only(['product_id', 'name', 'description']));
+            $plan->update(app(\App\Modules\Core\Billing\Actions\DraftPlanAttributes::class)->build($request->validated(), $plan->commercial_terms));
             app(\App\Modules\Core\Notification\Actions\RecordNotification::class)->handle(
                 $request->user(), 'Draft paket diperbarui', 'Perubahan draft "'.$plan->name.'" berhasil disimpan. Harga belum diaktifkan.'
             );
@@ -66,6 +66,7 @@ class PlanController extends Controller
     {
         return Inertia::render('Admin/Plans/Form', [
             'plan' => $plan,
+            'weddingPackages' => array_values(config('wedding_plans.packages', [])),
             'products' => Product::orderBy('sort_order')->orderBy('slug')->get(['id', 'slug', 'title', 'status']),
         ]);
     }
