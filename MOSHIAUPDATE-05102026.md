@@ -1,6 +1,50 @@
-# MOSHIA — Handoff 5 Oktober 2026
+# MOSHIA — Handoff diperbarui 6 Oktober 2026
 
 Baca dokumen ini terlebih dahulu di device berikutnya, lalu docs/planning/WEDDING_PACKAGES.md dan CHECKLIST.md. Ini ringkasan keputusan dan status implementasi, bukan transkrip.
+
+## Pindah perangkat — ekspor terbaru 6 Oktober 2026
+
+Gunakan bagian terbaru ini dan pembaruan 6 Oktober di bawah sebagai acuan. Catatan handoff awal di bagian bawah dipertahankan sebagai riwayat, bukan daftar pekerjaan yang harus diulang.
+
+### Database yang dibawa
+
+- **File terbaru: `exports/database/moshia-20261006-072406.sql`** (07:24:06 Asia/Bangkok).
+- Ukuran 34.147 byte; 22 tabel. Mencakup struktur/data akun, role, workspace, paket, notifikasi, entitlement, pesanan pembayaran dan undangan.
+- Migration lokal sampai **2026_10_05_000009_create_manual_wedding_purchases** sudah Ran. Countdown 24 jam tidak memerlukan migration baru.
+- Checksum pendamping: `exports/database/moshia-20261006-072406.sql.sha256`.
+- SHA-256: `0900ce752b6acd4e30e3337a07a138908434abe991dab13b8ca3cde59c935948`.
+- Export mysqldump selesai dengan exit 0, tanpa warning; penanda selesai dan tabel penting diperiksa. **Restore belum diuji.** Database sumber tidak diubah oleh ekspor.
+- Folder `exports/database/` diabaikan Git. Dump mengandung data pribadi/password hash; kirim melalui saluran privat. Jangan unggah ke repository publik.
+- `dbmoshia.sql` di root adalah ekspor lama; gunakan file bertanggal di atas untuk perpindahan kali ini. File lama dipertahankan.
+- Untuk ekspor ulang dari perangkat ini: `php scripts/export-local-database.php`. Script memakai konfigurasi Laravel aktif untuk database lokal dan menghasilkan file bertanggal baru, tanpa mencetak kredensial. Sesuaikan lokasi mysqldump di script bila XAMPP perangkat baru berbeda.
+
+### Berkas yang wajib ikut
+
+1. **Source lengkap termasuk file baru/untracked.** Banyak perubahan sesi ini belum di-commit/push. Menarik commit lama dari Git saja tidak membawa semua pekerjaan. Jika menyalin manual, bawa seluruh folder project yang diperlukan, termasuk `app/Modules/Wedding`, file Billing baru, komponen countdown, halaman Vue, migration dan tests baru.
+2. `composer.lock`, `package-lock.json`, dokumen planning/checklist, workbook terisi dan handoff ini.
+3. File SQL terbaru beserta checksum; keduanya tidak ikut Git.
+4. `.env` melalui saluran privat. Pertahankan `APP_KEY` bila memakai data lama; sesuaikan koneksi DB dan APP_URL. Jangan menjalankan key:generate untuk salinan data lama tanpa alasan.
+5. File upload pada `storage/app` jika ada. Dump SQL tidak memuat upload, konfigurasi SMTP atau aset build. Aset build dapat dibawa dari `public/build` atau dibuat ulang setelah approval.
+
+### Langkah pada device tujuan
+
+1. Siapkan PHP 8.2, MySQL/MariaDB yang kompatibel dan Node sesuai pin Volta project. Jalankan `composer install` dan `npm ci` dari lockfile bila dependensi belum tersedia.
+2. Backup database tujuan bila sudah berisi data. **Buat database kosong baru** melalui phpMyAdmin, pilih database tersebut lalu **Import** file SQL terbaru. Dump berisi DROP TABLE: jangan impor langsung ke database berisi data penting. Tidak memakai migrate:fresh.
+3. Sesuaikan `.env`: DB_HOST/PORT/DATABASE/USERNAME/PASSWORD dan APP_URL. Untuk mencoba simulasi rekening dummy gunakan **APP_ENV=local** dan **MANUAL_DEVELOPMENT_PAYMENTS=true**; jangan mengubah environment server produksi demi membuka simulasi.
+4. Jalankan `php artisan optimize:clear`, lalu `php artisan migrate:status`. Setelah import terbaru, migration sampai 000009 seharusnya Ran. Jalankan `php artisan migrate` hanya jika ada migration pending.
+5. Jalankan `php artisan test`. Acuan terakhir **172 tes / 1.389 assertions**, SQLite in-memory; ini hasil perangkat asal, bukan otomatis hasil perangkat tujuan.
+6. Build/dev harus meminta **approval tombol tool setiap kali**, sesuai preferensi pengguna. Build terakhir sudah disetujui dan berhasil: **802 modul**. Belum ada UAT browser lengkap.
+7. UAT: login owner/admin → pilih workspace → card Wedding **Lihat paket** → pilih Gold/Emerald/Diamond → **Make payment** → countdown 24 jam → admin **Payment accepted** → editor → simpan → preview privat → **Publish**. Cek lintas akun/workspace, mobile/tema, expiry dan reaktivasi.
+
+Waktu pesanan tidak direset saat pindah perangkat. Pesanan yang sudah berumur 24 jam tanpa penerimaan admin akan kedaluwarsa; buat pesanan baru untuk mencoba. Pembayaran yang sudah diterima tetap membuka persiapan editor, sementara masa aktif undangan baru dimulai saat Publish.
+
+### Lanjutkan pekerjaan berikutnya
+
+Alur manual, countdown dan editor teks dasar sudah tersedia; jangan dibangun ulang. Prioritas berikut: UAT alur ini, lalu scope Wedding D04 serta media/storage/kuota untuk C06/W01/W02. Midtrans masih rencana gateway, belum terintegrasi. Template lengkap, media, video/domain, invoice, webhook, unpublish, RSVP dan kesiapan produksi tetap terbuka.
+
+Prompt pembuka di device tujuan:
+
+> Baca MOSHIAUPDATE-05102026.md, khususnya pembaruan 6 Oktober 2026, serta docs/planning/WEDDING_LIFECYCLE.md dan CHECKLIST.md. Periksa source dan hasil import exports/database/moshia-20261006-072406.sql. Pembayaran manual, countdown 24 jam dan editor Wedding dasar sudah dibuat; lanjutkan dari UAT dan pekerjaan checklist berikutnya. Jangan reset database atau ulangi fitur yang tersedia. Setiap npm run build/dev wajib approval tool.
 
 ## Pembaruan tampilan — 6 Oktober 2026
 
