@@ -32,11 +32,12 @@ defineProps({
             </section>
             <section class="detail-card">
                 <h3>Pengelolaan platform</h3>
-                <p>Kelola pengguna, hak akses, katalog produk, dan draft paket. Pembayaran dan langganan akan tersedia bertahap.</p>
+                <p>Kelola pengguna, hak akses, katalog produk, draft paket, dan verifikasi pembayaran.</p>
                 <div class="dashboard-actions">
                     <Link :href="route('admin.users.index')" class="button button-primary">Kelola pengguna &amp; role</Link>
                     <Link :href="route('admin.products.index')" class="button button-outline">Kelola katalog produk</Link>
                     <Link :href="route('admin.plans.index')" class="button button-outline">Kelola draft paket</Link>
+                    <Link v-if="$page.props.developmentPayments" :href="route('admin.payments.index')" class="button button-outline">Pembayaran manual</Link>
                 </div>
             </section>
             <h2 class="text-2xl font-semibold">Katalog produk</h2>

@@ -31,6 +31,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'developmentPayments' => \App\Modules\Core\Billing\Http\Middleware\DevelopmentPayments::enabled(),
             'auth' => [
                 'homeUrl' => $request->user()
                     ? app(\App\Modules\Core\Catalog\DashboardDestination::class)->home($request->user())

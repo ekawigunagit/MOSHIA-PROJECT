@@ -11,7 +11,7 @@ defineProps({ plans: { type: Object, required: true } });
             <section class="detail-card">
                 <span class="section-kicker">PAKET PRODUK</span>
                 <h1 class="mt-4">Siapkan pilihan paket</h1>
-                <p>Draft hanya terlihat oleh admin. Harga, masa berlaku, trial, dan kuota belum ditentukan; paket belum dapat dibeli.</p>
+                <p>Draft hanya terlihat oleh admin. Pilihan aturan Wedding tersedia; draft ini tidak dipublikasikan otomatis. Simulasi pembayaran memakai pilihan paket Wedding yang ditetapkan untuk development.</p>
                 <div class="dashboard-actions"><Link :href="route('admin.plans.create')" class="button button-primary">Buat draft paket</Link></div>
             </section>
             <div v-if="plans.data.length" class="grid gap-5 sm:grid-cols-2">

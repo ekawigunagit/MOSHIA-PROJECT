@@ -56,11 +56,14 @@ function selectWorkspace(event) {
                 <div class="section-heading">
                     <div><span class="section-kicker">MOSHIA PRODUCTS</span><h2>Produk Moshia, satu akun.</h2></div>
                 </div>
-                <ProductCatalog :products="products" show-access />
-            </section>
-            <section class="detail-card">
-                <h3>Paket &amp; tagihan</h3>
-                <p>Paket berlangganan dan pembayaran belum tersedia. Anda belum dapat membeli atau mengaktifkan produk dari halaman ini.</p>
+                <ProductCatalog :products="products" show-access>
+                    <template #actions="{ product }">
+                        <div v-if="product.slug === 'wedding' && $page.props.developmentPayments" class="dashboard-actions">
+                            <Link v-if="activeWorkspace" :href="route('billing.index', activeWorkspace.id)" class="button button-primary">Lihat paket</Link>
+                            <p v-else>Buat workspace terlebih dahulu untuk melihat paket.</p>
+                        </div>
+                    </template>
+                </ProductCatalog>
             </section>
         </div>
     </MoshiaLayout>

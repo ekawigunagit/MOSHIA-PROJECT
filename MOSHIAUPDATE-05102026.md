@@ -2,6 +2,43 @@
 
 Baca dokumen ini terlebih dahulu di device berikutnya, lalu docs/planning/WEDDING_PACKAGES.md dan CHECKLIST.md. Ini ringkasan keputusan dan status implementasi, bukan transkrip.
 
+## Pembaruan tampilan — 6 Oktober 2026
+
+Verifikasi setelah penambahan batas pembayaran: **172 tes / 1.389 assertions** lulus, pemeriksaan batas countdown JavaScript lulus, build setelah persetujuan berhasil (**802 modul**). UAT browser manual masih belum dilakukan.
+
+Pembayaran memiliki batas **24 jam sejak created_at pesanan**, termasuk pesanan pending yang sudah ada. Countdown HH:MM:SS mengikuti waktu server pada halaman pelanggan/admin. Tepat saat batas tercapai, status menjadi payment_expired, tombol batal/Payment accepted disembunyikan dan backend menolak penerimaan atau pembatalan pesanan expired. Owner dapat membuat order baru; retry order pending tidak memperpanjang batas. Pembayaran yang sudah diterima tetap membuka editor dan masa aktif undangan tetap dihitung sejak Publish. Deadline dihitung dari created_at, sehingga tidak membutuhkan migration atau scheduler. Berbeda dari expired masa aktif undangan.
+
+Dashboard user kini membuka paket melalui tombol **Lihat paket** pada card Wedding Invitation. Bagian terpisah Paket & tagihan di bawah dashboard dihapus. Halaman paket menampilkan tiga card Gold/Emerald/Diamond yang dipilih dengan radio, lalu satu tombol **Make payment** di bawahnya. Pemilihan card tidak membuat pesanan; Make payment membuat pesanan dan menampilkan rekening dummy. Alur Payment accepted dan masa aktif sejak Publish tetap berlaku.
+
+## Pembaruan sesi lanjutan — 5 Oktober 2026
+
+**Bagian ini menggantikan status belum ada payment/lifecycle/Wedding pada catatan awal di bawah.**
+
+Keputusan pengguna: Midtrans sebagai rencana gateway; development memakai rekening dummy BCA **12345678 — MOSHIA CORPORATE**. Superadmin menerima pembayaran lewat tombol **Payment accepted**. Masa aktif 6/12 bulan baru dimulai saat owner menekan **Publish**, termasuk reaktivasi setelah expired.
+
+Sudah dibuat:
+- Halaman paket/pesanan per workspace, snapshot harga server, pembatalan order belum dibayar dan riwayat.
+- Admin Pembayaran Manual, konfirmasi Payment accepted, pencatatan admin/waktu dan notifikasi owner. Klik ganda tidak menggandakan efek.
+- Entitlement editor setelah penerimaan pembayaran; ends_at masih kosong hingga Publish.
+- Editor Wedding dasar (nama pasangan/tanggal/lokasi/pesan), preview privat, serta snapshot publik terpisah pada `/invitation/{slug}` tanpa login pengunjung.
+- Satu undangan/workspace dengan ID angka dan slug UUID string. Masa aktif dihitung sejak Publish; edit/publish ulang tidak memperpanjang periode.
+- Expiry menutup publik/editor tanpa menghapus data. Order baru setelah expired membuka editor setelah dibayar, tetapi publik tetap tertutup sampai Publish periode baru. Slug/konten dan riwayat periode lama dipertahankan.
+- Transaksi/row lock tenant, pemeriksaan owner/membership/entitlement, validasi/escaping dan guard expiry pada request.
+
+Route simulasi hanya terbuka pada APP_ENV local/testing dan MANUAL_DEVELOPMENT_PAYMENTS=true (default true); tertutup pada production/staging. Rekening dummy tidak untuk transfer nyata. Draft paket admin tetap draft; simulasi memakai preset development config/wedding_plans.php yang telah disetujui, tidak mengimpor workbook/mengaktifkan tabel draft.
+
+Verifikasi perangkat ini: **168 tes / 1.311 assertions** lulus pada SQLite in-memory; migration **2026_10_05_000009_create_manual_wedding_purchases** berhasil pada MySQL lokal; **npm run build disetujui dan berhasil, 800 modul**. Tidak reset database, mengubah role, commit/push atau deploy. UAT browser/mobile, concurrency MySQL dan restore dump belum diuji.
+
+Checklist: **9 tersedia (S01-S08, W03), 9 sebagian, 15 belum, 6 menunggu keputusan, 10 perlu verifikasi, 1 ditunda, 4 opsional**. C02/C03/C10, D03, W01/W02/W05 sebagian; W03 preview privat tersedia. Word dan Markdown diselaraskan; file before-20261005 dipertahankan.
+
+Belum tersedia: Midtrans/webhook, invoice, kuota/trial, pajak/refund/grace, pilihan template/media/video, unpublish, RSVP, subdomain/HTTPS/custom domain. Diamond tetap mencakup domain .com manual, tetapi pemenuhannya belum dibuat. Editor saat ini satu tampilan teks dasar untuk menguji alur.
+
+Langkah berikutnya: UAT alur manual → sepakati scope Wedding D04 dan storage/kuota → template/media C06/W01/W02 → Midtrans sandbox C03/C04 dan domain sesuai fase. Jangan membangun ulang pembayaran manual yang tersedia. Baca **docs/planning/WEDDING_LIFECYCLE.md** untuk petunjuk, batas dan aturan waktu.
+
+File utama baru: ManualWeddingBilling.php, PurchaseOrder.php, Billing/Domain/WeddingPurchase.php, ManualPaymentController.php, Modules/Wedding, config/billing.php, migration 000009, Pages/Billing/Index.vue, Pages/Admin/Payments/Index.vue, Pages/Wedding/Edit.vue, tests/Feature/Core/ManualWeddingBillingTest.php dan tests/Unit/WeddingPurchaseTest.php.
+
+## Catatan handoff awal (historis; status terbaru ada di atas)
+
 ## Ringkasan project
 
 Laravel 12/PHP 8.2, Breeze, Vue 3/Inertia 2, Tailwind, MySQL, Spatie Permission; Volta Node 22.23.3. Modular monolith: Core dahulu → Wedding → Jastip → Photo Booth → Restaurant. Project aktif D:\XAMPP8212\htdocs\MOSHIA-PROJECT; folder lama moshia bukan project aktif.

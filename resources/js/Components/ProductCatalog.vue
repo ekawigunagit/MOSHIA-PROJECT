@@ -18,6 +18,7 @@ defineProps({ products: { type: Array, default: () => [] }, showAccess: Boolean 
             <div class="detail-label">
                 <span>{{ product.slug === 'wedding' ? 'PRODUK PERTAMA YANG DIKEMBANGKAN' : 'DALAM ROADMAP MOSHIA' }}</span>
             </div>
+            <slot name="actions" :product="product" />
         </article>
     </div>
     <p v-if="!products.length" class="detail-card">Katalog sedang diperbarui. Silakan periksa kembali nanti.</p>

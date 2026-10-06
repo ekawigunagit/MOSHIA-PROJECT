@@ -19,6 +19,7 @@ require app_path('Modules/Core/Catalog/Routes/web.php');
 require app_path('Modules/Core/Identity/Routes/web.php');
 require app_path('Modules/Core/Billing/Routes/web.php');
 require app_path('Modules/Core/Notification/Routes/web.php');
+require app_path('Modules/Wedding/Routes/web.php');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

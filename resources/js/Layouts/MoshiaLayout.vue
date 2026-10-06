@@ -18,6 +18,7 @@ const navigation = computed(() => [
         { route: 'admin.users.index', active: 'admin.users.*', label: 'Pengguna & Role' },
         { route: 'admin.products.index', active: 'admin.products.*', label: 'Katalog Produk' },
         { route: 'admin.plans.index', active: 'admin.plans.*', label: 'Draft Paket' },
+        ...(page.props.developmentPayments ? [{ route: 'admin.payments.index', active: 'admin.payments.*', label: 'Pembayaran Manual' }] : []),
     ] : []),
     { route: 'dashboard', label: isSuperAdmin.value ? 'Workspace Saya' : 'Dashboard Workspace' },
     { route: 'profile.edit', label: 'Profil' },

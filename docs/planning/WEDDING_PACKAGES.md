@@ -29,4 +29,14 @@ Bagian ini mengoreksi catatan lama tentang paket yang hanya memiliki nama/deskri
 - C01 SEBAGIAN: editor aturan Wedding tersedia; aktivasi/status komersial dan kebijakan yang belum diputuskan tetap terbuka.
 - D02 SEBAGIAN: harga/durasi/model bayar/batas undangan jelas; trial, storage/media/kuota lain, pajak/refund/grace serta waktu mulai reaktivasi belum diputuskan. Jangan mengasumsikan gratis, unlimited atau tanpa pajak.
 - Domain premium/batas biaya, biaya dan periode perpanjangan domain belum ditentukan; hanya ekstensi .com yang disepakati.
-- Selanjutnya: rancang lifecycle pembayaran → akses editor sebelum publish → masa aktif sejak publish pertama. Jangan memulai ends_at saat pembayaran. Sepakati reaktivasi dan provider pembayaran sebelum aktivasi komersial.
+- Catatan di atas adalah hasil tahap draft awal; pembaruan berikut menggantikan status lifecycle/provider/reaktivasi tersebut.
+
+## Lanjutan 5 Oktober 2026 — pembayaran manual development
+
+Pengguna memilih Midtrans sebagai rencana gateway. Selama development gunakan rekening dummy BCA 12345678 atas nama MOSHIA CORPORATE dan tombol **Payment accepted** oleh superadmin. Masa aktif baru dimulai saat owner menekan Publish, termasuk pembelian kembali setelah expired.
+
+Alur manual sekarang tersedia: order bersnapshot dari preset server → penerimaan admin → entitlement editor → simpan/preview privat → Publish → expiry → order reaktivasi pada undangan yang sama. Draft admin tetap draft; simulasi memakai preset development terpisah dan hanya terbuka pada local/testing. Tidak ada aktivasi layanan komersial produksi.
+
+Lihat [WEDDING_LIFECYCLE.md](WEDDING_LIFECYCLE.md) untuk petunjuk, batas fitur, schema, aturan akses dan pekerjaan berikutnya. Editor teks dasar/preview/URL publik lokal tersedia; media/template lengkap/video/domain, Midtrans dan invoice belum tersedia.
+
+Trial/kuota/pajak/refund/grace dan biaya domain masih terbuka. Waktu mulai reaktivasi sudah diputuskan: Publish setelah pembayaran diterima. Riwayat periode lama dipertahankan, slug dan konten undangan tidak diganti.
