@@ -22,6 +22,28 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'subscriptions' => $request->query('section') === 'billing'
+                ? \App\Modules\Core\Billing\Models\PurchaseOrder::query()
+                    ->whereHas('tenant', fn ($query) => $query->where('owner_id', $request->user()->id))
+                    ->whereNotNull('paid_at')->whereNull('cancelled_at')
+                    ->where(fn ($query) => $query->whereNull('ends_at')->orWhere('ends_at', '>', now()))
+                    ->whereExists(function ($query) {
+                        $query->selectRaw('1')->from('core_entitlements')
+                            ->whereColumn('core_entitlements.tenant_id', 'core_purchase_orders.tenant_id')
+                            ->whereColumn('core_entitlements.product_id', 'core_purchase_orders.product_id')
+                            ->where('status', 'active')
+                            ->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
+                            ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now()));
+                    })
+                    ->with('tenant:id,name')->latest('id')->paginate(10, ['*'], 'subscriptions_page')->withQueryString()
+                    ->through(fn ($order) => [
+                        'id' => $order->id, 'tenant_id' => $order->tenant_id,
+                        'workspace' => $order->tenant->name,
+                        'package' => $order->terms['label'] ?? 'Wedding',
+                        'months' => $order->terms['validity_months'],
+                        'starts_at' => $order->first_published_at, 'ends_at' => $order->ends_at,
+                        'status' => $order->statusAt(\Carbon\CarbonImmutable::now())->value,
+                    ]) : null,
             'billingHistory' => $request->query('section') === 'billing'
                 ? \App\Modules\Core\Billing\Models\PurchaseOrder::query()
                     ->whereHas('tenant', fn ($query) => $query->where('owner_id', $request->user()->id))
@@ -29,6 +51,7 @@ class ProfileController extends Controller
                     ->latest('id')->paginate(10)->withQueryString()
                     ->through(fn ($order) => [
                         'id' => $order->id,
+                        'tenant_id' => $order->tenant_id,
                         'workspace' => $order->tenant->name,
                         'package' => $order->terms['label'] ?? $order->terms['key'] ?? 'Wedding',
                         'amount' => $order->terms['price_amount'],

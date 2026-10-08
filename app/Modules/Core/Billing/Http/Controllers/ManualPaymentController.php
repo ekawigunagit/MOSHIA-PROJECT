@@ -38,7 +38,7 @@ class ManualPaymentController extends Controller
         ]);
         $billing->create($request->user(), $tenant, $validated['package']);
 
-        return back()->with('success', 'Pesanan dibuat. Tunggu verifikasi pembayaran oleh admin.');
+        return to_route('billing.index', $tenant)->with('success', 'Pesanan dibuat. Tunggu verifikasi pembayaran oleh admin.');
     }
 
     public function cancel(Request $request, Tenant $tenant, PurchaseOrder $order, ManualWeddingBilling $billing)

@@ -9,6 +9,22 @@ use Illuminate\Http\Request;
 
 class WorkspaceController extends Controller
 {
+    public function edit(Request $request, int $tenant): \Inertia\Response
+    {
+        $workspace = $request->user()->tenants()->where('owner_id', $request->user()->id)->findOrFail($tenant);
+
+        return \Inertia\Inertia::render('Workspaces/Edit', ['workspace' => $workspace->only(['id', 'name'])]);
+    }
+
+    public function update(Request $request, int $tenant): RedirectResponse
+    {
+        $workspace = $request->user()->tenants()->where('owner_id', $request->user()->id)->findOrFail($tenant);
+        $data = $request->validate(['name' => ['required', 'string', 'max:100']]);
+        $workspace->update(['name' => $data['name']]);
+
+        return to_route('workspaces.edit', $workspace->id)->with('success', 'Nama workspace berhasil diperbarui.');
+    }
+
     public function store(Request $request, CreateWorkspace $create): RedirectResponse
     {
         $data = $request->validate(['name' => ['required', 'string', 'max:100']]);

@@ -1,6 +1,6 @@
 # UAT Wedding — 8 Oktober 2026
 
-Status: BELUM DIJALANKAN DI BROWSER. Gunakan akun pengujian dan rekening dummy development, bukan transfer uang nyata. Tes otomatis 176/1.506 lulus tidak menggantikan UAT ini.
+Status: ALUR LENGKAP BELUM DIJALANKAN DI BROWSER. Preview fixture desktop/mobile tercatat pada sesi sebelumnya. Gunakan akun pengujian dan rekening dummy development, bukan transfer uang nyata. Tes otomatis terbaru 187/1.640 lulus tidak menggantikan UAT ini.
 
 ## Persiapan
 
@@ -14,7 +14,8 @@ Status: BELUM DIJALANKAN DI BROWSER. Gunakan akun pengujian dan rekening dummy d
 - [ ] Buka tiga produk selain Wedding: masing-masing menampilkan Product Coming Soon.
 - [ ] Buka Wedding tanpa workspace: tombol mengarahkan ke pembuatan workspace.
 - [ ] Buat/pilih workspace sendiri; buka Wedding, lihat Gold/Emerald/Diamond beserta harga dan durasi yang benar.
-- [ ] Klik Pilih Gold/Emerald/Diamond. Halaman billing sudah memilih paket yang diklik, tetapi belum membuat order otomatis.
+- [ ] Klik Pilih Gold/Emerald/Diamond. Billing menampilkan ringkasan keranjang satu paket (bukan tiga card lagi), total server dan metode transfer BCA; belum membuat order. Ganti paket kembali ke perbandingan; Batal membuka riwayat tanpa order baru.
+- [ ] Make payment membuat pesanan lalu membuka billing tanpa parameter package; riwayat/countdown dan instruksi pembayaran tampil. Refresh tidak menggandakan pesanan.
 - [ ] Buat pesanan; jumlah sesuai snapshot server dan countdown 24 jam berjalan.
 - [ ] Sebelum diterima, pengguna belum dapat mengakses editor/publish.
 - [ ] Login superadmin; buka Pembayaran Manual dan terima pesanan pengujian yang benar.
@@ -23,6 +24,10 @@ Status: BELUM DIJALANKAN DI BROWSER. Gunakan akun pengujian dan rekening dummy d
 - [ ] Publish: URL publik bekerja; masa aktif mulai publish pertama.
 - [ ] Edit/simpan tanpa publish: preview berubah tetapi halaman publik tetap versi sebelumnya.
 - [ ] Publish ulang: halaman publik diperbarui tanpa menggeser akhir masa aktif.
+- [ ] Pilih salah satu dari tiga tema; upload foto/MP3, pilih cover/galeri, simpan, periksa preview dan publik setelah Publish.
+- [ ] Kirim RSVP/wishes dari pengunjung; owner melihat respons dan menyetujui ucapan sebelum tampil publik.
+- [ ] Klik Unpublish dan konfirmasi: halaman undangan, URL media publik dan pengiriman respons ditutup. Preview privat, konten, file serta respons lama tetap tersedia.
+- [ ] Publish kembali: tautan sama dibuka, tanggal akhir tidak bergeser. Akun lain/superadmin yang bukan owner tidak bisa Unpublish.
 - [ ] Buka akun → Billing: riwayat workspace sendiri muncul; belum dibayar tidak tertulis sebagai dibayar.
 
 ## Tampilan dan akses
@@ -52,4 +57,4 @@ Jangan memajukan jam sistem atau mengubah tanggal pesanan nyata. Skenario waktu 
 | Isolasi akun | Belum diuji melalui browser | Pending | — |
 | Expiry/reaktivasi | Tes otomatis lulus; UAT pending | Pending | — |
 
-Sesudah UAT, tetapkan D04 (scope template/konten/media), kemudian W01/W02 dan C06. Tidak mencentang W07 sampai scope rilis terkait benar-benar lulus.
+Sesudah UAT, tutup defect yang ditemukan lalu lengkapi D04, retensi/media C06 serta video/domain sesuai scope. W01/W02 sudah tersedia untuk editor dan tema lokal; tidak perlu dibangun ulang. Jangan mencentang W07 sampai scope rilis terkait benar-benar lulus.

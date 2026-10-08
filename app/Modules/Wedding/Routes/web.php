@@ -11,6 +11,7 @@ Route::middleware([DevelopmentPayments::class, 'auth', 'verified'])
         Route::patch('/', [InvitationController::class, 'update'])->middleware('throttle:30,1')->name('update');
         Route::get('/preview', [InvitationController::class, 'preview'])->name('preview');
         Route::post('/publish', [InvitationController::class, 'publish'])->middleware('throttle:20,1')->name('publish');
+        Route::post('/unpublish', [InvitationController::class, 'unpublish'])->middleware('throttle:20,1')->name('unpublish');
         Route::post('/media', [MediaController::class, 'store'])->middleware('throttle:20,1')->name('media.store');
         Route::get('/media/{media}', [MediaController::class, 'privateFile'])->whereNumber('media')->name('media.private');
         Route::patch('/responses/{response}', [ResponseController::class, 'moderate'])->whereNumber('response')->middleware('throttle:60,1')->name('responses.moderate');

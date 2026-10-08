@@ -38,6 +38,45 @@ class ProfileBillingHistoryTest extends TestCase
         $this->get('/profile')->assertInertia(fn (Assert $page) => $page->where('billingHistory', null));
     }
 
+    public function test_subscriptions_exclude_unpaid_expired_revoked_and_foreign_packages(): void
+    {
+        $this->withoutVite();
+        $this->seed(RoleSeeder::class);
+        $owner = User::factory()->create();
+        $owner->assignRole('super-admin');
+        $billing = app(ManualWeddingBilling::class);
+        $kept = [];
+        foreach (['awaiting', 'active', 'pending', 'expired', 'revoked', 'foreign'] as $state) {
+            $buyer = $state === 'foreign' ? User::factory()->create() : $owner;
+            $tenant = app(CreateWorkspace::class)->handle($buyer, $state);
+            $order = $billing->create($buyer, $tenant, 'gold');
+            if ($state !== 'pending') {
+                $billing->accept($owner, $order);
+            }
+            if ($state === 'active') {
+                $billing->saveContent($buyer, $tenant, ['partner_one' => 'A', 'partner_two' => 'B', 'event_date' => '2027-01-01', 'venue' => 'Jakarta']);
+                $billing->publish($buyer, $tenant);
+            }
+            if ($state === 'expired') {
+                $order->update(['ends_at' => now()]);
+            }
+            if ($state === 'revoked') {
+                \App\Modules\Core\Entitlement\Models\Entitlement::where('tenant_id', $tenant->id)->update(['status' => 'revoked']);
+            }
+            if (in_array($state, ['awaiting', 'active'])) {
+                $kept[] = $order->id;
+            }
+        }
+        $this->actingAs($owner)->get('/profile?section=billing')->assertInertia(fn (Assert $page) => $page
+            ->has('subscriptions.data', 2)
+            ->where('subscriptions.data.0.id', $kept[1])
+            ->where('subscriptions.data.0.status', 'active')
+            ->where('subscriptions.data.1.id', $kept[0])
+            ->where('subscriptions.data.1.status', 'awaiting_publish')
+            ->has('billingHistory.data', 5));
+        $this->get('/profile')->assertInertia(fn (Assert $page) => $page->where('subscriptions', null));
+    }
+
     public function test_history_requires_login_and_empty_account_has_no_orders(): void
     {
         $this->withoutVite();

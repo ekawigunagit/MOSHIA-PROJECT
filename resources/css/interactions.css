@@ -1,0 +1,30 @@
+/* Shared hover treatment for actions and navigation, in both themes. */
+:root {
+    --moshia-hover-gradient: linear-gradient(135deg, #e52238 0%, #d91432 55%, #b9082a 100%);
+}
+
+/* Backdrop buttons close a drawer; they must remain transparent overlays. */
+:is(button:not(.console-overlay), input[type="submit"], input[type="button"], a.button,
+    a.plan-select, a.console-role, .console-nav-item, .console-account-link,
+    .console-profile-tabs a, .navigation a, .account-links a, [role="menuitem"])
+    :is(svg) { transition: color .18s ease; }
+
+:is(button:not(.console-overlay), input[type="submit"], input[type="button"], a.button,
+    a.plan-select, a.console-role, .console-nav-item, .console-account-link,
+    .console-profile-tabs a, .navigation a, .account-links a, [role="menuitem"]):not(:disabled):not([aria-disabled="true"]):not(.disabled):not(.unavailable):hover {
+    background: var(--moshia-hover-gradient) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: 0 3px 10px rgb(217 20 50 / 18%);
+}
+
+:is(button:not(.console-overlay), a.button, a.plan-select, a.console-role,
+    .console-nav-item, .console-account-link, .console-profile-tabs a,
+    .navigation a, .account-links a, [role="menuitem"]):not(:disabled):not([aria-disabled="true"]):not(.disabled):not(.unavailable):hover
+:is(svg, .shell-icon, span:not(.console-switch), small, strong, p) {
+    color: #fff !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button svg, a svg { transition: none; }
+}

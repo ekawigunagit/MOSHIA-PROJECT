@@ -26,6 +26,7 @@ const form = useForm({
 const steps = ['Template', 'Pasangan', 'Acara', 'Foto & musik', 'RSVP & ucapan', 'Preview & publish'];
 const step = ref(0);
 const confirmPublish = ref(false);
+const confirmUnpublish = ref(false);
 const uploadInput = ref(null);
 const upload = useForm({ kind: 'image', file: null });
 const publication = useForm({});
@@ -63,6 +64,12 @@ function toggleGallery(id) {
 function publish() {
     publication.post(route('wedding.publish', props.workspace.id), {
         preserveScroll: true, onSuccess: () => { confirmPublish.value = false; },
+    });
+}
+function unpublish() {
+    publication.post(route('wedding.unpublish', props.workspace.id), {
+        preserveScroll: true,
+        onSuccess: () => { confirmUnpublish.value = false; confirmPublish.value = false; },
     });
 }
 function moderate(response) {
@@ -159,7 +166,16 @@ onUnmounted(() => window.removeEventListener('beforeunload', leave));
                             <div class="dashboard-actions"><a v-if="invitation.draft_content" :href="route('wedding.preview', workspace.id)" target="_blank" rel="noopener" class="button button-outline">Buka preview privat ↗</a><button type="button" class="button button-primary" :disabled="!invitation.draft_content || form.isDirty || busy" @click="confirmPublish = true">Publish undangan</button></div>
                             <div v-if="confirmPublish" class="studio-confirm" role="region" aria-label="Konfirmasi publish"><p>{{ order.first_published_at ? 'Konten publik akan diperbarui. Masa aktif tetap sama.' : 'Publish akan membuka undangan untuk publik dan memulai masa aktif paket.' }}</p><button type="button" class="button button-primary" :disabled="busy || form.isDirty" @click="publish">Ya, publish sekarang</button><button type="button" class="button button-outline" :disabled="busy" @click="confirmPublish = false">Batal</button></div>
                             <InputError :message="publication.errors.publish" />
-                            <div v-if="order.first_published_at" class="studio-confirm"><strong>Tautan undangan</strong><a :href="publicUrl" target="_blank" rel="noopener" class="mt-2 block break-all underline">{{ publicUrl }}</a><p>Salin tautan ini untuk dibagikan kepada tamu.</p></div>
+                            <div v-if="invitation.published_at && order.first_published_at" class="studio-confirm">
+                                <strong>Tautan undangan</strong><a :href="publicUrl" target="_blank" rel="noopener" class="mt-2 block break-all underline">{{ publicUrl }}</a><p>Salin tautan ini untuk dibagikan kepada tamu.</p>
+                                <button type="button" class="button button-outline mt-4" :disabled="busy" @click="confirmUnpublish = true; confirmPublish = false">Unpublish</button>
+                                <div v-if="confirmUnpublish" class="mt-4" role="region" aria-label="Konfirmasi unpublish">
+                                    <p>Tutup undangan, media publik, RSVP dan ucapan dari pengunjung? Data tetap tersimpan dan masa aktif tetap berjalan.</p>
+                                    <button type="button" class="button button-primary" :disabled="busy" @click="unpublish">Ya, tutup undangan</button>
+                                    <button type="button" class="button button-outline" :disabled="busy" @click="confirmUnpublish = false">Batal</button>
+                                </div>
+                            </div>
+                            <p v-else-if="order.first_published_at" class="studio-help" role="status">Undangan tidak sedang ditampilkan ke publik. Publish kembali untuk membukanya; tanggal akhir masa aktif tetap sama.</p>
                         </section>
                         <footer class="studio-form-footer"><button v-if="step > 0" type="button" class="button button-outline" @click="step--">Kembali</button><button type="submit" class="button button-outline" :disabled="busy">{{ form.processing ? 'Menyimpan…' : 'Simpan draft' }}</button><button v-if="step < steps.length - 1" type="button" class="button button-primary" @click="step++">Lanjut →</button></footer>
                     </form>

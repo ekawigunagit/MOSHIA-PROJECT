@@ -127,6 +127,19 @@ class ManualWeddingBilling
         }, 3);
     }
 
+    public function unpublish(User $user, Tenant $tenant): void
+    {
+        DB::transaction(function () use ($user, $tenant) {
+            $tenant = Tenant::lockForUpdate()->findOrFail($tenant->id);
+            $this->authorizeOwner($user, $tenant);
+            $invitation = Invitation::where('tenant_id', $tenant->id)->lockForUpdate()->firstOrFail();
+            // Keep both snapshots and the original paid period; only close public access.
+            if ($invitation->published_at !== null) {
+                $invitation->update(['published_at' => null]);
+            }
+        }, 3);
+    }
+
     public function publish(User $user, Tenant $tenant): void
     {
         DB::transaction(function () use ($user, $tenant) {

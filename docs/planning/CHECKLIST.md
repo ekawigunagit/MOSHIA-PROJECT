@@ -2,6 +2,42 @@
 
 Diperbarui: **8 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
 
+**Aturan dokumentasi:** setiap perubahan/penambahan wajib memperbarui checklist ini dan handoff `MOSHIAUPDATE-DDMMYYYY.md` sesuai tanggal hari itu (Asia/Bangkok). Aturan persisten: `../../AGENTS.md`. Handoff hari ini: [MOSHIAUPDATE-08102026.md](../../MOSHIAUPDATE-08102026.md).
+
+## Pembaruan terakhir — keranjang dan dokumentasi harian
+
+- S03: Kelola profil di dashboard diganti Kelola workspace untuk edit nama workspace terpilih. Owner-only pada server/UI, nama wajib maksimal 100 karakter; hanya name diperbarui. Build disetujui **814 modul**, WorkspaceManagementTest + PlatformTest **9 tes / 117 assertions** lulus. UAT browser pending, centang checklist tetap; fitur pengelolaan lain belum ditambahkan.
+
+- S03: Dashboard Workspace menjadi accordion Tambah Workspace + daftar workspace akun; form dipindah ke halaman tersendiri, pemilihan nama membuka Add product pada workspace aktif. Breadcrumb mengikuti nama workspace/form. Backend pemilihan tetap memeriksa membership; Wedding Add product membuka pilihan paket, produk roadmap belum diaktifkan. Build disetujui **813 modul**, regresi workspace/dashboard **29 tes / 287 assertions** lulus setelah memperbarui manifest halaman baru. UAT visual masih pending; status centang tetap.
+
+- S03: breadcrumb bersama pada semua halaman menu sidebar/profil, submenu Billing, keranjang, Wedding Studio dan edit/buat admin. Parent berupa tautan, halaman aktif aria-current, mendukung dark mode/mobile dan hover merah gradasi. Breadcrumb Billing sebelumnya digantikan komponen bersama. Build disetujui berhasil **812 modul**, diff whitespace lulus; backend tidak diuji ulang dan UAT visual browser pending. Status centang tetap.
+
+- S03/C03, penyederhanaan navigasi Billing: menu pengaturan akun umum disembunyikan khusus Billing; hanya Subscription, Payment History, Payment Method. Breadcrumb ikon Beranda > Billing > submenu aktif dan judul mengikuti pilihan. Build setelah persetujuan berhasil **811 modul**; backend tidak diuji ulang untuk perubahan tampilan ini. UAT browser pending; status checklist tidak berubah.
+
+- Verifikasi submenu Billing: build disetujui dan berhasil **811 modul**, diff whitespace lulus; pengujian terarah billing lulus, bukan run ulang suite penuh.
+
+- C03/S03: Billing akun memiliki submenu Subscription (default, paket dibayar yang masih berlaku dengan entitlement aktif), Payment History (tabel semua status pesanan), dan Payment Method (Manual payment saja). Subscription/history scoped ke owner dan memiliki pagination. Regresi **3 tes / 72 assertions** lulus; UAT browser pending. C03 tetap sebagian karena gateway/invoice belum tersedia.
+
+- Verifikasi hover global: build disetujui dan berhasil **811 modul**, diff whitespace lulus. Suite backend tidak diulang untuk perubahan CSS ini.
+
+- S03: hover tombol dan menu diseragamkan melalui interactions.css: gradasi merah Moshia, teks/ikon putih, mendukung dark mode. Mencakup sidebar/menu akun/tab profil/pilihan paket/CTA; kontrol disabled dan backdrop tidak diberi hover aktif. Tidak mengubah status penyelesaian fitur; UAT visual pending.
+
+- Verifikasi penyesuaian tombol ×/profil: build disetujui dan berhasil **810 modul**; diff whitespace lulus. Suite backend tidak diulang karena perubahan visual saja.
+
+- S03/C03: tombol tutup keranjang 32 px (SVG 16 px), profil 36 px (ikon 18 px). Hover gradasi merah/ikon putih dan fokus keyboard jelas; bingkai tebal dihilangkan. Perubahan visual, status checklist tetap; UAT browser pending.
+
+- Verifikasi loading logo terbaru: build disetujui dan berhasil **810 modul**; diff whitespace lulus. Tidak menjalankan suite backend ulang untuk perubahan visual ini.
+
+- C03, loading checkout: popup menampilkan logo Moshia 28 px di lingkaran merah 64 px ketika Make payment diproses. Mengikuti request asli, kembali ke form saat error, tanpa delay buatan. Dukungan dark mode/status aksesibel/reduced motion; backend tetap. UAT browser pending dan status C03 tetap sebagian.
+
+- Verifikasi popup terbaru: build setelah approval berhasil **808 modul**, diff whitespace diperiksa. Tidak menjalankan ulang suite backend untuk perubahan frontend ini.
+
+- C03, popup keranjang: ringkasan paket kini berupa modal dengan backdrop, tombol ×/Batal, Escape, fokus dialog dan scroll mobile. Menutup tidak membuat order; Make payment sukses menutup popup dan membuka riwayat. Aksi tutup dibatasi selama submit. Backend tetap; UAT browser popup belum dilakukan, centang/status C03 tidak berubah.
+
+- C03: memilih paket di perbandingan langsung membuka ringkasan keranjang satu paket, metode transfer dan total. Tidak mengulang tiga card. Make payment membuat order lalu membuka instruksi/countdown dan riwayat. Ganti paket/Batal tidak membuat order.
+- Regresi checkout/paket: **21 tes / 379 assertions** lulus; build disetujui, **807 modul**. Suite penuh terakhir **187 tes / 1.640 assertions** adalah hasil setelah Unpublish, sebelum penambahan tes checkout; jangan menganggap suite penuh sudah dijalankan ulang setelah itu.
+- Instruksi dokumentasi pengguna disimpan di AGENTS.md; dibuat handoff harian 8 Oktober. Perubahan ini dokumentasi saja, tanpa pengujian/build aplikasi ulang. Jumlah centang tetap 11 dari 54; status C03/W05 tetap sebagian dan UAT masih pending.
+
 **Fokus:** verifikasi akun → workspace → paket → Payment accepted → editor/preview → Publish → masa aktif. Rekening dummy development; Midtrans menyusul.
 
 **Berbagi akses dan undangan anggota ditunda** sesuai arahan terbaru. Workspace awal dikelola pemilik sendiri.
@@ -20,11 +56,13 @@ Pembayaran manual development, Wedding Studio enam langkah, template, media, RSV
 - Jastip Manager, Photo Booth System dan Restaurant Manager menampilkan Product Coming Soon.
 - Harga/durasi berasal dari config server. Halaman paket bukan pemenuhan template/video/domain dan bukan aktivasi penjualan production.
 - File: MoshiaLayout.vue, Profile/Edit.vue, Products/Plans.vue, ProductPlansController.php, ProfileController.php, console.css, product-plans.css.
-- Tes tambahan: ProfileBillingHistoryTest dan ProductPlansTest. Suite penuh terbaru: 185 tes / 1.611 assertions.
+- Tes tambahan: ProfileBillingHistoryTest dan ProductPlansTest. Suite penuh terbaru: 187 tes / 1.640 assertions.
 - S03 mencakup layout/menu produk; C03 mencakup history pribadi. W01/W02 tersedia untuk tiga tema konfigurasi dan editor lokal; admin katalog template belum tersedia.
 - Langkah aktif berikutnya: [UAT alur manual](UAT_WEDDING.md) serta penetapan D04. Pemilik meminta pengalaman lengkap form sampai publish, termasuk media, musik, RSVP dan wishes.
 - Detail layout: [DASHBOARD_LAYOUT.md](DASHBOARD_LAYOUT.md).
 ## Pembaruan Wedding Studio dan arsitektur
+
+Audit kode 8 Oktober: migration sampai 000011 sudah Ran pada perangkat ini; suite saat ini 187 tes / 1.640 assertions lulus. Lanjutan W05 menambahkan Unpublish oleh owner terverifikasi, menutup halaman/media publik dan respons tamu tanpa menghapus data atau mengubah periode. Publish kembali memakai tanggal akhir lama. W05 tetap sebagian karena DNS, kegagalan layanan eksternal, quota dan concurrency belum diverifikasi. Tidak menjalankan reset database atau mengubah akun.
 
 Lihat [WEDDING_STUDIO.md](WEDDING_STUDIO.md) untuk fitur, batas dan cara review. Penamaan tabel bisnis memakai awalan modul sesuai [MODULAR_MONOLITH.md](MODULAR_MONOLITH.md): core_, wedding_, lalu jastip_/photobooth_/restaurant_ ketika dikembangkan. Media bersama telah dipindahkan ke core_media tanpa mengubah referensi undangan.
 
@@ -38,7 +76,7 @@ Lihat [WEDDING_STUDIO.md](WEDDING_STUDIO.md) untuk fitur, batas dan cara review.
 - **PERLU VERIFIKASI** = perlu bukti pengujian.
 - **DITUNDA / OPSIONAL** = bukan fokus saat ini.
 
-**Status saat ini: 11 item tersedia (S01-S08, W01-W03) dicentang; 43 belum dicentang.** Ini jumlah item, bukan persentase project. Suite terbaru: 185 tes / 1.611 assertions; build 807 modul. Preview browser fixture desktop/mobile diperiksa; UAT alur nyata belum selesai.
+**Status saat ini: 11 item tersedia (S01-S08, W01-W03) dicentang; 43 belum dicentang.** Ini jumlah item, bukan persentase project. Suite terbaru: 187 tes / 1.640 assertions; build 807 modul. Preview browser fixture desktop/mobile diperiksa; UAT alur nyata belum selesai.
 
 Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pengujian device dan kesiapan rilis dicatat terpisah pada V01–V04 dan R01–R06. Buka preview Markdown dengan **Ctrl+Shift+V**. Buka **Detail dan bukti** bila membutuhkan syarat lengkap tiap item.
 
@@ -48,8 +86,8 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
 ## Hasil pemeriksaan terbaru — 8 Oktober 2026
 
-- Tes otomatis: **176 passed, 1.506 assertions**, SQLite in-memory. Mencakup pembayaran manual, batas expiry, reaktivasi, isolasi tenant dan rollback.
-- Database lokal: migration **2026_10_05_000009** berhasil pada MySQL lokal. Tidak melakukan reset/restore database.
+- Tes otomatis: **187 passed, 1.640 assertions**, SQLite in-memory. Mencakup pembayaran manual, expiry, reaktivasi, isolasi tenant, rollback, media/RSVP dan Unpublish.
+- Database lokal: migration sampai **2026_10_08_000011** berstatus Ran pada pemeriksaan perangkat ini. Tidak melakukan reset/restore database.
 - Runtime: Node **v22.23.3**, PHP **8.2.12**; vendor tersedia dan tidak ada config cache Laravel.
 - Git: perubahan source/dokumen belum di-commit atau push.
 - V01–V04 tetap perlu verifikasi penuh: build setelah approval berhasil (807 modul), tetapi UAT browser/mobile, email nyata tahap ini dan restore backup belum dilakukan.
@@ -80,7 +118,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Konfirmasi database target dan backup; periksa migrate:status; jalankan migration normal hanya jika diperlukan. Tidak menggunakan migrate:fresh. Uji perbaikan index tenant dan migrasi parsial sesuai kebutuhan.
 
-  Bukti awal / lokasi: database/migrations/2026_10_02_000005_link_entitlements_to_product_ids.php; EntitlementProductRelationTest.php; sampai 000009 berstatus Ran pada pemeriksaan 8 Oktober; backup/restore masih perlu diverifikasi.
+  Bukti awal / lokasi: database/migrations/2026_10_02_000005_link_entitlements_to_product_ids.php; EntitlementProductRelationTest.php; sampai 000011 berstatus Ran pada pemeriksaan 8 Oktober; backup/restore masih perlu diverifikasi.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -568,7 +606,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Subdomain unik, entitlement/kuota dicek; publish gagal tidak dicatat sukses; alamat publik menampilkan versi yang benar.
 
-  Bukti awal / lokasi: Modul Wedding dasar sudah tersedia (editor teks, preview, publish URL lokal). Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
+  Bukti awal / lokasi: Wedding Studio, tema, media, RSVP/wishes dan Unpublish tersedia; URL publik masih lokal. Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -583,7 +621,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Uji publish ulang/unpublish, subdomain bentrok, upload gagal, expiry dan akses lintas tenant; konsistensi quota saat gagal/concurrent.
 
-  Bukti awal / lokasi: Publish ulang mempertahankan periode, expiry menutup publik, pembelian ulang memakai undangan lama. Unpublish, DNS, quota dan concurrency belum diuji. Detail: WEDDING_LIFECYCLE.md.
+  Bukti awal / lokasi: Publish ulang mempertahankan periode, expiry menutup publik, pembelian ulang memakai undangan lama. Unpublish menutup halaman/media/respons publik; preview/data dan periode tetap. WeddingEditorExperienceTest menguji publish kembali dan akses owner. DNS, quota dan concurrency belum diuji.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -613,7 +651,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Daftar → bayar → entitlement → konten → preview → publish pada staging; uji gagal/akses ilegal; catat persetujuan owner sebelum rilis.
 
-  Bukti awal / lokasi: Modul Wedding dasar sudah tersedia (editor teks, preview, publish URL lokal). Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
+  Bukti awal / lokasi: Wedding Studio, tema, media, RSVP/wishes dan Unpublish tersedia; URL publik masih lokal. Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -628,7 +666,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Builder lanjutan/otomasi domain opsional P2. Domain .com manual paket Diamond tetap harus dipenuhi pada C08/W04 sebelum penawaran komersial; bukan manfaat opsional.
 
-  Bukti awal / lokasi: Modul Wedding dasar sudah tersedia (editor teks, preview, publish URL lokal). Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
+  Bukti awal / lokasi: Wedding Studio, tema, media, RSVP/wishes dan Unpublish tersedia; URL publik masih lokal. Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 

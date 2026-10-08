@@ -20,6 +20,7 @@ class DashboardController extends Controller
             'workspaces' => $request->user()->tenants()->get(['core_tenants.id', 'core_tenants.name'])
                 ->map(fn ($item) => $item->only(['id', 'name'])),
             'activeWorkspace' => $tenant?->only(['id', 'name']),
+            'canManageWorkspace' => $tenant && $tenant->owner_id === $request->user()->id,
             'products' => array_map(fn ($product) => [
                 ...$product,
                 'hasAccess' => $tenant ? $access->allows($request->user(), $tenant, $product['slug']) : false,

@@ -56,6 +56,13 @@ class InvitationController extends Controller
         return back()->with('success', 'Undangan berhasil dipublikasikan.');
     }
 
+    public function unpublish(Request $request, Tenant $tenant, ManualWeddingBilling $billing)
+    {
+        $billing->unpublish($request->user(), $tenant);
+
+        return back()->with('success', 'Undangan ditutup dari publik. Data tersimpan dan masa aktif tetap berjalan.');
+    }
+
     public function preview(Request $request, Tenant $tenant, ManualWeddingBilling $billing)
     {
         $billing->editorOrder($request->user(), $tenant);

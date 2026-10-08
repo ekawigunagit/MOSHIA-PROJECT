@@ -31,6 +31,10 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'workspaceNavigation' => fn () => $request->user()
+                ? $request->user()->tenants()->get(['core_tenants.id', 'core_tenants.name'])->map(fn ($tenant) => $tenant->only(['id', 'name']))
+                : [],
+            'selectedWorkspaceId' => fn () => $request->session()->get('tenant_id'),
             'developmentPayments' => \App\Modules\Core\Billing\Http\Middleware\DevelopmentPayments::enabled(),
             'auth' => [
                 'homeUrl' => $request->user()

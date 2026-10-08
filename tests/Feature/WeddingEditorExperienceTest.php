@@ -80,6 +80,52 @@ class WeddingEditorExperienceTest extends TestCase
         ])->assertSessionHasNoErrors();
         return Media::where('tenant_id', $this->tenant->id)->latest('id')->firstOrFail();
     }
+    public function test_unpublish_closes_all_public_endpoints_and_republish_preserves_period(): void {
+        $photo = $this->photo();
+        $this->save(['cover_id' => $photo->id]);
+        $this->publish();
+        $before = $this->invitation();
+        $end = $before->publishedOrder->ends_at->toIso8601String();
+        $this->post(route('wedding.unpublish', $this->tenant))->assertSessionHasNoErrors();
+        $this->post(route('wedding.unpublish', $this->tenant))->assertSessionHasNoErrors();
+        $closed = $this->invitation();
+        $this->assertNull($closed->published_at);
+        $this->assertSame($before->published_content, $closed->published_content);
+        $this->assertSame($before->draft_content, $closed->draft_content);
+        $this->assertTrue($before->first_published_at->equalTo($closed->first_published_at));
+        $this->get(route('wedding.preview', $this->tenant))->assertOk();
+        $this->get(route('wedding.media.private', [$this->tenant, $photo]))->assertOk();
+        $this->get(route('wedding.public', $closed->slug))->assertNotFound();
+        $this->get(route('wedding.media.public', [$closed->slug, $photo]))->assertNotFound();
+        $this->post(route('wedding.responses.store', $closed->slug), [
+            'submission_id' => (string) Str::uuid(), 'name' => 'Guest', 'attendance' => 'yes', 'guests' => 1,
+        ])->assertNotFound();
+        $this->assertDatabaseCount('wedding_responses', 0);
+        $this->travel(1)->days();
+        $this->publish();
+        $this->get(route('wedding.public', $closed->slug))->assertOk();
+        $this->get(route('wedding.media.public', [$closed->slug, $photo]))->assertOk();
+        $this->assertSame($end, $this->invitation()->publishedOrder->ends_at->toIso8601String());
+    }
+
+    public function test_unpublish_requires_verified_owner_and_does_not_enable_expired_republish(): void {
+        $this->save();
+        $this->publish();
+        $other = User::factory()->create();
+        $this->tenant->members()->attach($other);
+        foreach ([$other, $this->admin] as $user) {
+            $this->actingAs($user)->post(route('wedding.unpublish', $this->tenant))->assertForbidden();
+        }
+        $this->assertNotNull($this->invitation()->published_at);
+        $this->owner->forceFill(['email_verified_at' => null])->save();
+        $this->actingAs($this->owner)->post(route('wedding.unpublish', $this->tenant))->assertRedirect(route('verification.notice'));
+        $this->owner->forceFill(['email_verified_at' => now()])->save();
+        $this->actingAs($this->owner)->post(route('wedding.unpublish', $this->tenant))->assertSessionHasNoErrors();
+        $this->travelTo($this->invitation()->publishedOrder->ends_at);
+        $this->post(route('wedding.publish', $this->tenant))->assertForbidden();
+        $this->assertNull($this->invitation()->published_at);
+    }
+
     public function test_editor_templates_and_preview_publish_snapshot(): void {
         $this->get(route('wedding.edit', $this->tenant))->assertInertia(fn (Assert $page) => $page
             ->has('templates', 3)->has('media', 0)->has('responses.data', 0));

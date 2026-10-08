@@ -1,6 +1,22 @@
-# MOSHIA — Handoff diperbarui 6 Oktober 2026
+# MOSHIA — Handoff diperbarui 8 Oktober 2026
 
 Baca dokumen ini terlebih dahulu di device berikutnya, lalu docs/planning/WEDDING_PACKAGES.md dan CHECKLIST.md. Ini ringkasan keputusan dan status implementasi, bukan transkrip.
+
+## Audit dan lanjutan checklist — 8 Oktober 2026
+
+Perubahan flow checkout terbaru: pilih Gold/Emerald/Diamond di halaman Products/Plans → halaman Billing menampilkan satu ringkasan keranjang paket terpilih, metode transfer BCA dan total → Make payment membuat order → redirect ke billing tanpa parameter package untuk melihat instruksi pembayaran/countdown dan riwayat. Tidak mengulang tiga card pilihan paket di Billing. Ganti paket kembali ke halaman perbandingan; Batal membuka riwayat tanpa membuat pesanan. Tidak menambahkan kupon, pajak, kartu kredit atau recurring charge dari gambar referensi.
+
+Build frontend setelah persetujuan berhasil (807 modul). Checklist Markdown/Word dan skenario UAT diperbarui agar sesuai implementasi. Jumlah item tersedia tetap 11 (S01-S08, W01-W03); Unpublish melengkapi sebagian W05, bukan tanda bahwa seluruh gate rilis sudah lulus.
+
+Kode dari perangkat lain sudah mencakup Wedding Studio enam langkah, tiga tema, media privat Core Media (foto/MP3), RSVP/wishes dengan moderasi, layout/menu produk dan billing profil. W01-W03 tersedia; C06/W05/W06 masih sebagian. Baca WEDDING_STUDIO.md, MODULAR_MONOLITH.md dan CHECKLIST.md sebagai acuan terkini. Keterangan editor hanya teks/RSVP belum dibuat di riwayat bawah sudah tidak berlaku.
+
+Perangkat ini dikonfirmasi memiliki migration sampai 2026_10_08_000011 Ran. Suite setelah lanjutan W05: **187 tes / 1.640 assertions** lulus. UAT browser menyeluruh, concurrency MySQL dan restore masih belum dilakukan; preview fixture lama bukan UAT transaksi nyata.
+
+Lanjutan yang dibuat: tombol **Unpublish** pada langkah Preview & publish dengan konfirmasi. Owner terverifikasi dapat menutup halaman undangan, media publik dan pengiriman RSVP/wishes. Draft/published snapshot, respons tamu, file dan tanggal pertama/periode tetap disimpan. Masa aktif tetap berjalan; Publish kembali memakai tanggal akhir yang sama. Guard publik bersama PublishedInvitation memastikan seluruh endpoint publik ditutup. Aksi transaksi mengunci tenant/undangan; klik ulang aman. Tidak ada migration baru untuk Unpublish.
+
+W05 tetap SEBAGIAN karena DNS/quota/concurrency dan skenario kegagalan layanan eksternal belum lengkap. W07/UAT tidak dicentang. Berikutnya: jalankan UAT_WEDDING.md, tutup defect, lalu retensi/media C06 serta video/domain sesuai scope; Midtrans tetap tahap integrasi berikutnya.
+
+Ekspor SQL bertanggal 6 Oktober di bawah adalah snapshot lama sebelum migration Studio/Media. Jangan menganggapnya sudah membawa data terbaru 8 Oktober. Bila pindah perangkat lagi, ekspor ulang database dan sertakan storage/app berisi upload privat serta source terbaru.
 
 ## Pindah perangkat — ekspor terbaru 6 Oktober 2026
 

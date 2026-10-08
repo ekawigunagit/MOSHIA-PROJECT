@@ -46,6 +46,21 @@ class DashboardDestinationTest extends TestCase
         ];
     }
 
+    public function test_workspace_menu_is_private_and_create_page_selects_the_new_workspace(): void
+    {
+        $user = User::factory()->create();
+        $own = app(CreateWorkspace::class)->handle($user, 'Workspace pertama');
+        $foreign = app(CreateWorkspace::class)->handle(User::factory()->create(), 'Workspace orang lain');
+        $this->actingAs($user)->get(route('workspaces.create'))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('Workspaces/Create')->has('workspaceNavigation', 1)->where('workspaceNavigation.0.id', $own->id));
+        $this->post(route('workspaces.store'), ['name' => 'Workspace kedua'])->assertRedirect(route('dashboard'));
+        $this->get(route('dashboard'))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->has('workspaceNavigation', 2)->where('activeWorkspace.name', 'Workspace kedua'));
+        $this->post(route('workspaces.select', $own->id))->assertRedirect(route('dashboard'));
+        $this->get(route('dashboard'))->assertInertia(fn (Assert $page) => $page->where('activeWorkspace.id', $own->id));
+        $this->post(route('workspaces.select', $foreign->id))->assertNotFound();
+    }
+
     #[DataProvider('destinations')]
     public function test_login_uses_an_authorized_local_destination(string $role, mixed $intended, string $expected): void
     {

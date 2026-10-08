@@ -7,7 +7,7 @@ class PublishedInvitation {
     public function find(string $slug): Invitation {
         $invitation = Invitation::with('publishedOrder')->where('slug', $slug)->firstOrFail();
         $order = $invitation->publishedOrder;
-        abort_unless($invitation->published_content && $order, 404);
+        abort_unless($invitation->published_at && $invitation->published_content && $order, 404);
         abort_unless($order->tenant_id === $invitation->tenant_id
             && $order->lifecycle()->isWithinPublicLifetimeAt(CarbonImmutable::now()), 404);
         abort_unless(Entitlement::where('tenant_id', $invitation->tenant_id)->where('product_id', $order->product_id)

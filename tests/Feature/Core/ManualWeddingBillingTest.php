@@ -71,6 +71,20 @@ class ManualWeddingBillingTest extends TestCase
         return Invitation::firstOrFail();
     }
 
+    public function test_cart_selection_does_not_create_order_until_checkout_then_redirects_to_history(): void
+    {
+        $cart = route('billing.index', ['tenant' => $this->tenant->id, 'package' => 'diamond']);
+        $this->actingAs($this->owner)->get($cart)->assertOk();
+        $this->assertDatabaseCount('core_purchase_orders', 0);
+        $this->from($cart)->post(route('billing.store', $this->tenant), ['package' => 'diamond'])
+            ->assertSessionHasNoErrors()->assertRedirect(route('billing.index', $this->tenant));
+        $this->get(route('billing.index', $this->tenant))->assertInertia(fn (Assert $page) => $page
+            ->where('orders.data.0.terms.key', 'diamond')
+            ->where('orders.data.0.terms.price_amount', 559000)
+            ->where('orders.data.0.status', 'pending_payment'));
+        $this->assertDatabaseCount('core_purchase_orders', 1);
+    }
+
     public function test_owner_sees_dummy_account_and_server_side_packages(): void
     {
         $this->actingAs($this->owner)->get(route('billing.index', $this->tenant))
