@@ -1,0 +1,47 @@
+.product-plans-page{padding-bottom:32px}
+.plans-page-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:28px}
+.plans-page-heading h1{font-size:32px;letter-spacing:-.035em;font-weight:600;margin:8px 0}
+.plans-page-heading p{font-size:14px;color:var(--muted);max-width:700px;line-height:1.7}
+.plans-page-label{font-size:11px;color:var(--muted);white-space:nowrap}
+.plans-comparison{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--surface)}
+.plans-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line);font-size:12px}
+.plans-toolbar>span:last-child{color:var(--muted)}
+.plans-toolbar strong{margin-left:10px;color:var(--text);font-weight:500;background:var(--bg);border:1px solid var(--line);padding:9px 14px;border-radius:9px}
+.plans-category{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:24px;padding:9px 13px;font-weight:600}
+.plans-category .shell-icon{width:15px;color:var(--red)}
+.plans-workspace{padding:14px 22px;background:var(--bg);display:flex;justify-content:space-between;gap:16px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.plans-workspace a{color:var(--red);font-weight:600}
+.plans-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:8px;gap:8px}
+.plan-column{display:flex;flex-direction:column;padding:8px 14px 14px;background:var(--bg);border:1px solid var(--line);border-radius:15px;min-width:0}
+.plan-name{background:var(--surface);padding:15px 12px;border-radius:11px;margin:0 -6px 22px;min-height:94px;position:relative}
+.plan-name h2{font-size:20px;font-weight:600;margin-bottom:4px}
+.plan-name p{font-size:11px;line-height:1.6;color:var(--muted);max-width:200px}
+.plan-badge{display:inline-block;font-size:10px;font-weight:600;padding:3px 7px;border-radius:6px;background:#fff;color:#a0182a;margin-top:8px}
+.plan-price{font-size:clamp(22px,2.1vw,32px);font-weight:600;letter-spacing:-.045em}
+.plan-price>span{display:block;font-size:11px;letter-spacing:0;font-weight:400;margin-top:4px;opacity:.8}
+.plan-duration{font-size:12px;margin:12px 0 18px;color:var(--muted)}
+.plan-select{display:block;text-align:center;padding:11px 8px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:600;background:var(--surface);transition:box-shadow .15s}
+.plan-select:hover{box-shadow:0 0 0 2px var(--red)}
+.plan-select.unavailable{opacity:.7}
+.plan-price-note{font-size:10px;line-height:1.8;text-align:center;color:var(--muted);margin:13px 0 22px}
+.plan-features{list-style:none;display:grid;gap:15px;font-size:12px;padding:0;margin:0 0 32px}
+.plan-features li{display:flex;align-items:flex-start;gap:9px;line-height:1.6}
+.plan-features li>span{color:#16805a;font-weight:700}
+.plan-footer{margin-top:auto;padding:13px 10px;background:var(--surface);border-radius:9px;font-size:10px;display:flex;align-items:center;gap:8px;line-height:1.6}
+.plan-footer>.shell-icon{width:17px}
+.plan-column.featured{background:linear-gradient(145deg,#9d172a,#e93243 55%,#b81e37);color:white;border-color:#d6273a}
+.featured .plan-name{background:#8b1427;color:white}
+.featured .plan-name p,.featured .plan-duration,.featured .plan-price-note{color:#ffe1e5}
+.featured .plan-features li>span{color:#fff}
+.featured .plan-select{background:white;color:#a3172b;border-color:white}
+.featured .plan-footer{background:#ffffff18;color:#fff}
+.plans-notice{border-top:1px solid var(--line);padding:20px 24px;font-size:11px;line-height:1.8;color:var(--muted)}
+.plans-notice strong{color:var(--text);font-size:12px}
+.plans-notice p{margin-top:6px}
+.product-coming-soon{padding:80px 24px;text-align:center;border:1px solid var(--line);border-radius:22px;background:var(--surface)}
+.coming-soon-icon{width:64px;height:64px;border-radius:20px;margin:0 auto 24px;background:var(--soft-red);color:var(--red);display:flex;align-items:center;justify-content:center}
+.coming-soon-icon .shell-icon{width:28px;height:28px}
+.product-coming-soon h2{font-size:32px;font-weight:600;margin:12px 0}
+.product-coming-soon p{font-size:14px;line-height:1.8;color:var(--muted);margin-bottom:28px}
+@media(max-width:1100px){.plans-page-label{display:none}.plans-grid{gap:6px}.plan-column{padding:8px 10px 12px}}
+@media(max-width:650px){.plans-grid{grid-template-columns:1fr;padding:12px;gap:16px}.plans-toolbar{flex-direction:column;align-items:flex-start;gap:22px}.plans-workspace{flex-wrap:wrap}.plans-page-heading h1{font-size:27px}.plan-column{padding:12px 18px 18px}.plan-name{min-height:0}.plan-price{font-size:32px}.plan-price>span{display:inline;margin-left:6px}.plan-features{gap:12px}.product-coming-soon{padding:55px 20px}}

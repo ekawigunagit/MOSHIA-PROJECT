@@ -22,6 +22,20 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'billingHistory' => $request->query('section') === 'billing'
+                ? \App\Modules\Core\Billing\Models\PurchaseOrder::query()
+                    ->whereHas('tenant', fn ($query) => $query->where('owner_id', $request->user()->id))
+                    ->with('tenant:id,name')
+                    ->latest('id')->paginate(10)->withQueryString()
+                    ->through(fn ($order) => [
+                        'id' => $order->id,
+                        'workspace' => $order->tenant->name,
+                        'package' => $order->terms['label'] ?? $order->terms['key'] ?? 'Wedding',
+                        'amount' => $order->terms['price_amount'],
+                        'paid_at' => $order->paid_at,
+                        'status' => $order->statusAt(\Carbon\CarbonImmutable::now())->value,
+                    ])
+                : null,
         ]);
     }
 

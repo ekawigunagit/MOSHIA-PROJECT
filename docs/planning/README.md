@@ -1,3 +1,5 @@
+> Update aktif 8 Oktober 2026: baca [Wedding Studio](WEDDING_STUDIO.md), [arsitektur dan nama tabel](MODULAR_MONOLITH.md), serta [CHECKLIST.md](CHECKLIST.md). Editor/template/media/RSVP/wishes sudah tersedia untuk pembayaran manual development. Suite terbaru 185 tes / 1.611 assertions. Catatan 5 Oktober di bawah adalah riwayat; checklist Word belum disinkronkan dengan perubahan terbaru.
+
 # Dokumen perencanaan Moshia — 5 Oktober 2026
 
 ## Aturan paket Wedding terbaru
@@ -28,3 +30,7 @@ Bawa dua DOCX, handoff, source/lockfiles dan workbook yang sudah diisi ke device
 ## Handoff device — 5 Oktober 2026
 
 Baca [MOSHIAUPDATE-05102026.md](../../MOSHIAUPDATE-05102026.md). Checklist Word terbaru: [MOSHIACHEKLIST.docx](MOSHIACHEKLIST.docx). Dump dbmoshia.sql di root disimpan lokal dan tidak ikut Git; bawa secara privat. Backup checklist Word sebelum pembaruan: MOSHIACHEKLIST.before-20261005.docx. Struktur Word diperiksa; tata letak visual dan restore database belum diuji.
+
+## Kelanjutan 8 Oktober 2026
+
+Checklist Markdown sudah memuat layout/menu produk dan suite 176 tes/1.506 assertions; build 806 modul. Mulai dari [UAT_WEDDING.md](UAT_WEDDING.md), lalu scope D04/template/media. Checklist Word belum disinkronkan pada pembaruan ini.

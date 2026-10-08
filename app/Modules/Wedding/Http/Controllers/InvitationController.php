@@ -4,10 +4,12 @@ namespace App\Modules\Wedding\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Core\Billing\Actions\ManualWeddingBilling;
-use App\Modules\Core\Entitlement\Models\Entitlement;
 use App\Modules\Core\Tenancy\Models\Tenant;
+use App\Modules\Wedding\Http\Requests\SaveInvitationRequest;
 use App\Modules\Wedding\Models\Invitation;
-use Carbon\CarbonImmutable;
+use App\Modules\Core\Media\Models\Media;
+use App\Modules\Wedding\Models\GuestResponse;
+use App\Modules\Wedding\Services\PublishedInvitation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -17,34 +19,40 @@ class InvitationController extends Controller
     {
         $order = $billing->editorOrder($request->user(), $tenant);
         $invitation = Invitation::where('tenant_id', $tenant->id)->firstOrFail();
+        $responses = GuestResponse::where('invitation_id', $invitation->id);
 
         return Inertia::render('Wedding/Edit', [
             'workspace' => $tenant->only('id', 'name'),
             'invitation' => $invitation->only('draft_content', 'published_at'),
             'order' => $order->only('id', 'terms', 'first_published_at', 'ends_at'),
             'publicUrl' => route('wedding.public', $invitation->slug),
+            'templates' => collect(config('wedding_editor.templates'))->map(fn ($t, $key) => ['key' => $key, ...$t])->values(),
+            'media' => Media::where('tenant_id', $tenant->id)->where('collection', 'wedding')->latest('id')->get()->map(fn ($m) => [
+                'id' => $m->id, 'kind' => $m->kind, 'size' => $m->size,
+                'url' => route('wedding.media.private', [$tenant->id, $m->id]),
+            ]),
+            'responses' => (clone $responses)->latest('id')->paginate(10, ['id','name','attendance','guests','wish','approved','created_at'], 'responses_page')->withQueryString(),
+            'responseStats' => [
+                'total' => (clone $responses)->count(),
+                'attending' => (clone $responses)->where('attendance', 'yes')->sum('guests'),
+                'pendingWishes' => (clone $responses)->whereNotNull('wish')->where('approved', false)->count(),
+            ],
+            'limits' => [
+                'imageKb' => config('core_media.image_kb'), 'musicKb' => config('core_media.music_kb'),
+                'gallery' => config('wedding_editor.gallery_items'), 'files' => config('core_media.items_per_workspace_collection'),
+            ],
         ]);
     }
 
-    public function update(Request $request, Tenant $tenant, ManualWeddingBilling $billing)
+    public function update(SaveInvitationRequest $request, Tenant $tenant, ManualWeddingBilling $billing)
     {
-        $billing->authorizeOwner($request->user(), $tenant);
-        $content = $request->validate([
-            'partner_one' => ['required', 'string', 'max:100'],
-            'partner_two' => ['required', 'string', 'max:100'],
-            'event_date' => ['required', 'date_format:Y-m-d'],
-            'venue' => ['required', 'string', 'max:300'],
-            'message' => ['nullable', 'string', 'max:2000'],
-        ]);
-        $billing->saveContent($request->user(), $tenant, $content);
-
-        return back()->with('success', 'Draft tersimpan. Perubahan tampil publik setelah Publish.');
+        $billing->saveContent($request->user(), $tenant, $request->validated());
+        return back()->with('success', 'Draft tersimpan. Preview sudah diperbarui; halaman publik berubah setelah Publish.');
     }
 
     public function publish(Request $request, Tenant $tenant, ManualWeddingBilling $billing)
     {
         $billing->publish($request->user(), $tenant);
-
         return back()->with('success', 'Undangan berhasil dipublikasikan.');
     }
 
@@ -53,28 +61,31 @@ class InvitationController extends Controller
         $billing->editorOrder($request->user(), $tenant);
         $invitation = Invitation::where('tenant_id', $tenant->id)->firstOrFail();
         abort_unless($invitation->draft_content, 404);
-
-        return $this->render($invitation->draft_content, true);
+        return $this->render($invitation, $invitation->draft_content, true);
     }
 
-    public function show(string $slug)
+    public function show(string $slug, PublishedInvitation $published)
     {
-        $invitation = Invitation::with('publishedOrder')->where('slug', $slug)->firstOrFail();
-        $order = $invitation->publishedOrder;
-        abort_unless($invitation->published_content && $order, 404);
-        abort_unless($order->tenant_id === $invitation->tenant_id
-            && $order->lifecycle()->isWithinPublicLifetimeAt(CarbonImmutable::now()), 404);
-        // A newly paid reactivation must not reopen the previous publication.
-        abort_unless(Entitlement::where('tenant_id', $invitation->tenant_id)->where('product_id', $order->product_id)
-            ->where('status', 'active')->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
-            ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now()))->exists(), 404);
-
-        return $this->render($invitation->published_content, false);
+        $invitation = $published->find($slug);
+        return $this->render($invitation, $invitation->published_content, false);
     }
 
-    private function render(array $content, bool $preview)
+    private function render(Invitation $invitation, array $content, bool $preview)
     {
-        return response()->view('wedding.invitation', compact('content', 'preview'))
+        $theme = config('wedding_editor.templates.'.($content['template'] ?? 'classic'))
+            ?? config('wedding_editor.templates.classic');
+        $mediaUrls = [];
+        foreach (PublishedInvitation::mediaIds($content) as $id) {
+            $mediaUrls[$id] = $preview
+                ? route('wedding.media.private', [$invitation->tenant_id, $id])
+                : route('wedding.media.public', [$invitation->slug, $id]);
+        }
+        $wishes = ($content['wishes_enabled'] ?? false)
+            ? GuestResponse::where('invitation_id', $invitation->id)->where('approved', true)
+                ->whereNotNull('wish')->latest('id')->limit(30)->get(['name','wish'])
+            : collect();
+
+        return response()->view('wedding.invitation', compact('content', 'preview', 'theme', 'mediaUrls', 'invitation', 'wishes'))
             ->header('Cache-Control', 'private, no-store')
             ->header('X-Robots-Tag', 'noindex, nofollow');
     }

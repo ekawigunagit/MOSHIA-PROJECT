@@ -1,0 +1,76 @@
+/* Authenticated Moshia shell. Landing page styles remain separate. */
+.moshia-console{--bg:#f5f5f7;--surface:#fff;--text:#25252c;--muted:#72727e;--line:#e3e3e9;--sidebar:#ebebef;--red:#e52b3b;--soft-red:#fff0f1;min-height:100vh;color:var(--text);color-scheme:light}
+html.dark .moshia-console{--bg:#141419;--surface:#1d1d24;--text:#f0f0f4;--muted:#a5a5b3;--line:#34343f;--sidebar:#19191f;--soft-red:#382128;color-scheme:dark}
+html:not(.dark) .moshia-console,html.dark .moshia-console,html:not(.dark) .moshia-console .console-content,html.dark .moshia-console .console-content,html:not(.dark) .moshia-console .shell.account-main,html.dark .moshia-console .shell.account-main{background:var(--bg)!important;color:var(--text)!important}
+.shell-icon{width:20px;height:20px;flex-shrink:0}
+.console-topbar{height:72px;position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:24px;padding:0 28px 0 24px}
+.console-brand-area{width:208px;flex-shrink:0;display:flex;align-items:center;gap:12px}
+.console-brand{display:inline-flex;gap:10px;align-items:center;font-size:20px;font-weight:700;letter-spacing:.03em}
+.console-header-title{flex:1;min-width:0;color:var(--muted)}
+.console-header-title h2{font-size:14px!important;font-weight:500!important}
+.console-top-actions{display:flex;align-items:center;gap:18px}
+.console-role{border:1px solid var(--line);border-radius:24px;padding:7px 13px;font-size:12px;color:var(--muted)}
+.console-icon-button,.console-avatar{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:transparent;color:var(--text);border:1px solid var(--line)}
+.console-avatar{width:40px;height:40px;border:2px solid var(--red);box-shadow:0 0 0 4px var(--soft-red)}
+.console-avatar:hover,.console-avatar.is-open{background:var(--soft-red);color:var(--red)}
+.console-sidebar{position:fixed;top:72px;bottom:0;left:0;width:256px;background:var(--sidebar);padding:25px 14px 20px;display:flex;flex-direction:column;z-index:30;border-radius:0 22px 0 0;overflow-y:auto}
+.console-sidebar-heading{padding:0 14px 16px;display:flex;align-items:center;justify-content:space-between;font-size:10px;letter-spacing:.12em;font-weight:700;color:var(--muted)}
+.console-navigation{display:grid;gap:6px}
+.console-nav-item{min-height:46px;padding:12px 14px;border-radius:12px;display:flex;align-items:center;gap:13px;font-size:13px;line-height:1.4}
+.console-nav-item .shell-icon{color:var(--muted)}
+.console-nav-item:hover{background:var(--surface)}
+.console-nav-item.active{background:var(--surface);font-weight:600;box-shadow:0 2px 8px #17171c04}
+.console-nav-item.active>.shell-icon:first-child{color:var(--red)}
+.console-nav-chevron{width:14px;margin-left:auto;color:var(--red)!important}
+.console-sidebar-footer{margin-top:auto;padding:32px 14px 4px;display:flex;align-items:center;gap:12px;font-size:12px}
+.console-sidebar-footer strong,.console-sidebar-footer span:not(.console-brand-dot){display:block}
+.console-sidebar-footer div>span{color:var(--muted);font-size:11px;margin-top:4px}
+.console-brand-dot{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 5px var(--soft-red)}
+.console-content{margin-left:256px;min-height:calc(100vh - 72px);padding-bottom:32px}
+.moshia-console .shell{width:min(1280px,calc(100% - 72px))}
+.moshia-console .account-main{padding-top:36px;min-height:0}
+.moshia-console .detail-card,.moshia-console .product-card{background:var(--surface);border-color:var(--line);border-radius:20px;box-shadow:0 3px 12px #17171c02}
+html .moshia-console .dashboard-intro{background:var(--surface)!important;color:var(--text)!important;border-color:var(--line)!important}
+html .moshia-console .dashboard-intro h1{color:var(--text)!important}
+html .moshia-console .dashboard-intro p{color:var(--muted)!important}
+.moshia-console .detail-card h1{font-size:clamp(24px,2.5vw,34px);line-height:1.25;letter-spacing:-.025em}
+.moshia-console .section-kicker{font-size:10px;letter-spacing:.15em}
+.moshia-console .detail-card p{color:var(--muted);line-height:1.7}
+.moshia-console .button{border-radius:10px;font-size:13px;box-shadow:none;min-height:42px}
+.moshia-console .button-primary{background:var(--red);color:#fff;border-color:var(--red)}
+.moshia-console .button-outline{border-color:var(--line);background:var(--surface);color:var(--text)}
+.moshia-console .moshia-input{background:var(--bg);color:var(--text);border-color:var(--line);border-radius:10px}
+.console-account-root{position:relative}
+.console-account-panel{position:absolute;right:0;top:54px;width:300px;max-height:calc(100dvh - 88px);overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 40px #17171c22;padding:8px;z-index:60}
+.console-account-heading{padding:12px 12px 16px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.console-account-heading strong{display:block;font-size:15px;overflow-wrap:anywhere}
+.console-account-heading>span{display:block;margin-top:4px;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.console-account-link{display:flex;align-items:center;gap:14px;padding:13px 12px;min-height:46px;width:100%;border-radius:9px;text-align:left;font-size:13px}
+.console-account-link>.shell-icon{color:var(--muted)}
+.console-account-link:hover{background:var(--bg)}
+.console-account-divider{border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+.console-logout{color:var(--red)}
+.console-switch{width:34px;height:20px;border-radius:20px;background:#c7c7ce;display:flex;align-items:center;padding:3px;margin-left:auto;flex-shrink:0}
+.console-switch>span{width:14px;height:14px;border-radius:50%;background:white;transition:transform .15s}
+.console-switch.on{background:var(--red)}
+.console-switch.on>span{transform:translateX(14px)}
+.console-flash{padding-top:24px}
+.console-alert{padding:14px 18px;border:1px solid #76bb99;border-radius:12px;background:var(--surface)}
+.console-alert.is-error{border-color:var(--red)}
+.console-mobile-only{display:none}
+.console-skip{position:fixed;top:-100px;z-index:100;background:var(--surface);padding:12px}
+.console-skip:focus{top:8px;left:8px}
+.console-profile{padding-top:36px}
+.console-profile-title{font-size:28px;font-weight:600;margin-bottom:8px}
+.console-profile-subtitle{color:var(--muted);margin-bottom:28px}
+.console-profile-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.console-profile-tabs a{font-size:12px;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.console-profile-tabs a.active{color:var(--red);border-color:var(--red);background:var(--soft-red)}
+.console-table-wrap{overflow-x:auto}
+.console-table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+.console-table th{color:var(--muted);font-weight:500;background:var(--bg)}
+.console-table td,.console-table th{padding:16px;border-bottom:1px solid var(--line);white-space:nowrap}
+.console-table-status{padding:5px 9px;background:var(--bg);border-radius:6px}
+@media(max-width:1100px){.console-role{display:none}.moshia-console .shell{width:calc(100% - 40px)}}
+@media(max-width:899px){.console-mobile-only{display:inline-flex}.console-brand-area{width:auto}.console-topbar{padding:0 18px;gap:16px;height:64px}.console-brand{font-size:17px}.console-top-actions{margin-left:auto;gap:12px}.console-header-title{display:none}.console-content{margin-left:0;min-height:calc(100vh - 64px)}.console-sidebar{display:none;top:0;width:min(290px,85vw);z-index:70;border-radius:0 20px 20px 0}.console-sidebar.is-open{display:flex}.console-overlay{position:fixed;inset:0;z-index:65;background:#14141b70;backdrop-filter:blur(2px)}.console-account-panel{position:fixed;top:70px;right:12px;max-width:calc(100vw - 24px)}.moshia-console .account-main,.console-profile{padding-top:24px}.moshia-console .detail-card{padding:22px}.console-profile-tabs{gap:6px}.console-profile-tabs a{padding:9px 10px}}
+@media(prefers-reduced-motion:reduce){.console-switch>span{transition:none}}

@@ -1,6 +1,6 @@
 # Checklist Moshia
 
-Diperbarui: **5 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
+Diperbarui: **8 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
 
 **Fokus:** verifikasi akun → workspace → paket → Payment accepted → editor/preview → Publish → masa aktif. Rekening dummy development; Midtrans menyusul.
 
@@ -8,7 +8,25 @@ Diperbarui: **5 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item)
 
 ## Progres terbaru — pembayaran manual dan Wedding dasar
 
-Pembayaran manual development, editor teks, preview privat, Publish, expiry dan reaktivasi tersedia. C02/C03 tetap sebagian. Lihat WEDDING_LIFECYCLE.md untuk cara mencoba dan batas implementasi.
+Pembayaran manual development, Wedding Studio enam langkah, template, media, RSVP/wishes, preview privat, Publish, expiry dan reaktivasi tersedia. C02/C03 tetap sebagian. Lihat WEDDING_LIFECYCLE.md untuk cara mencoba dan batas implementasi.
+
+## Pembaruan antarmuka — 8 Oktober 2026
+
+- Layout admin/pelanggan: sidebar abu-abu, konten putih, aksen merah Moshia, mobile drawer dan dark mode.
+- Profil diakses melalui ikon kanan atas; menu Profil di sidebar dihapus.
+- Account information/Security menggunakan form yang tersedia; Billing menampilkan riwayat pesanan pribadi dengan pagination dan isolasi antar-akun.
+- Account Activity dan Notification Settings baru halaman penjelasan; audit login dan preferensi kanal belum dibuat.
+- Sidebar pengguna memiliki empat produk. Wedding memiliki perbandingan Gold/Emerald/Diamond; pilihan paket dibawa ke billing tanpa membuat order otomatis.
+- Jastip Manager, Photo Booth System dan Restaurant Manager menampilkan Product Coming Soon.
+- Harga/durasi berasal dari config server. Halaman paket bukan pemenuhan template/video/domain dan bukan aktivasi penjualan production.
+- File: MoshiaLayout.vue, Profile/Edit.vue, Products/Plans.vue, ProductPlansController.php, ProfileController.php, console.css, product-plans.css.
+- Tes tambahan: ProfileBillingHistoryTest dan ProductPlansTest. Suite penuh terbaru: 185 tes / 1.611 assertions.
+- S03 mencakup layout/menu produk; C03 mencakup history pribadi. W01/W02 tersedia untuk tiga tema konfigurasi dan editor lokal; admin katalog template belum tersedia.
+- Langkah aktif berikutnya: [UAT alur manual](UAT_WEDDING.md) serta penetapan D04. Pemilik meminta pengalaman lengkap form sampai publish, termasuk media, musik, RSVP dan wishes.
+- Detail layout: [DASHBOARD_LAYOUT.md](DASHBOARD_LAYOUT.md).
+## Pembaruan Wedding Studio dan arsitektur
+
+Lihat [WEDDING_STUDIO.md](WEDDING_STUDIO.md) untuk fitur, batas dan cara review. Penamaan tabel bisnis memakai awalan modul sesuai [MODULAR_MONOLITH.md](MODULAR_MONOLITH.md): core_, wedding_, lalu jastip_/photobooth_/restaurant_ ketika dikembangkan. Media bersama telah dipindahkan ke core_media tanpa mengubah referensi undangan.
 
 ## Cara memakai
 
@@ -20,21 +38,21 @@ Pembayaran manual development, editor teks, preview privat, Publish, expiry dan 
 - **PERLU VERIFIKASI** = perlu bukti pengujian.
 - **DITUNDA / OPSIONAL** = bukan fokus saat ini.
 
-**Status saat ini: 9 item tersedia (S01-S08 dan W03) dicentang; 45 belum dicentang.** Rincian: 9 sebagian, 15 belum, 6 menunggu keputusan, 10 perlu verifikasi, 1 ditunda, 4 opsional. Ini jumlah item, bukan persentase project. Hasil terbaru: 168 tes / 1.311 assertions; build 800 modul. UAT belum dilakukan.
+**Status saat ini: 11 item tersedia (S01-S08, W01-W03) dicentang; 43 belum dicentang.** Ini jumlah item, bukan persentase project. Suite terbaru: 185 tes / 1.611 assertions; build 807 modul. Preview browser fixture desktop/mobile diperiksa; UAT alur nyata belum selesai.
 
 Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pengujian device dan kesiapan rilis dicatat terpisah pada V01–V04 dan R01–R06. Buka preview Markdown dengan **Ctrl+Shift+V**. Buka **Detail dan bukti** bila membutuhkan syarat lengkap tiap item.
 
-**Mulai:** UAT alur manual → scope Wedding D04/storage/kuota → template/media → Midtrans sandbox dan domain sesuai fase. Kolaborasi anggota tetap ditunda.
+**Mulai:** review Wedding Studio dan UAT alur lengkap → lengkapi storage/retensi, video/domain serta lifecycle → Midtrans sandbox sesuai fase. Kolaborasi anggota tetap ditunda.
 
 ---
 
-## Hasil pemeriksaan terbaru — 5 Oktober 2026
+## Hasil pemeriksaan terbaru — 8 Oktober 2026
 
-- Tes otomatis: **168 passed, 1.311 assertions**, SQLite in-memory. Mencakup pembayaran manual, batas expiry, reaktivasi, isolasi tenant dan rollback.
+- Tes otomatis: **176 passed, 1.506 assertions**, SQLite in-memory. Mencakup pembayaran manual, batas expiry, reaktivasi, isolasi tenant dan rollback.
 - Database lokal: migration **2026_10_05_000009** berhasil pada MySQL lokal. Tidak melakukan reset/restore database.
 - Runtime: Node **v22.23.3**, PHP **8.2.12**; vendor tersedia dan tidak ada config cache Laravel.
 - Git: perubahan source/dokumen belum di-commit atau push.
-- V01–V04 tetap perlu verifikasi penuh: build setelah approval berhasil (800 modul), tetapi UAT browser/mobile, email nyata tahap ini dan restore backup belum dilakukan.
+- V01–V04 tetap perlu verifikasi penuh: build setelah approval berhasil (807 modul), tetapi UAT browser/mobile, email nyata tahap ini dan restore backup belum dilakukan.
 - Berikutnya: UAT alur manual lalu scope template/media Wedding dan Midtrans sandbox. Harga tetap snapshot server; trial/kuota/pajak/refund/grace belum ditetapkan.
 ## 1. Baseline dan verifikasi device
 
@@ -62,7 +80,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Konfirmasi database target dan backup; periksa migrate:status; jalankan migration normal hanya jika diperlukan. Tidak menggunakan migrate:fresh. Uji perbaikan index tenant dan migrasi parsial sesuai kebutuhan.
 
-  Bukti awal / lokasi: database/migrations/2026_10_02_000005_link_entitlements_to_product_ids.php; EntitlementProductRelationTest.php; sampai 000007 menurut hasil historis.
+  Bukti awal / lokasi: database/migrations/2026_10_02_000005_link_entitlements_to_product_ids.php; EntitlementProductRelationTest.php; sampai 000009 berstatus Ran pada pemeriksaan 8 Oktober; backup/restore masih perlu diverifikasi.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -92,7 +110,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Jika perlu build/dev, minta approval tombol tool untuk setiap perintah. Verifikasi halaman baru dan tampilan browser sesudahnya.
 
-  Bukti awal / lokasi: Build historis 796 modul; bukan bukti aset device target terkini.
+  Bukti awal / lokasi: Build lokal terakhir 8 Oktober: 807 modul, termasuk Products/Plans; UAT browser masih perlu dilakukan.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -267,16 +285,16 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   </details>
 
-- [ ] **D04 — Scope Wedding MVP** · TUNGGU KEPUTUSAN
+- [ ] **D04 — Scope Wedding MVP** · SEBAGIAN
 
   <details>
   <summary>Detail dan bukti</summary>
 
-  Status: TUNGGU KEPUTUSAN | PRD: D04 | Bergantung pada: Sesuai fase
+  Status: SEBAGIAN | PRD: D04 | Bergantung pada: Sesuai fase
 
-  Penerimaan / tindakan: Tetapkan field konten, template awal, aturan preview/publish/unpublish; putuskan apakah guest/RSVP/wishes wajib rilis pertama.
+  Penerimaan / tindakan: Pemilik meminta pengalaman lengkap submit form sampai publish, termasuk template, foto, musik, RSVP dan wishes. Unpublish, retensi dan rincian operasional tersisa mengikuti checklist.
 
-  Bukti awal / lokasi: Keputusan tertulis product owner; kolom PIC wajib diisi, jangan menetapkan harga/provider secara otomatis.
+  Bukti awal / lokasi: Scope disetujui dalam percakapan 8 Oktober; implementasi dan batasnya: WEDDING_STUDIO.md.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -419,16 +437,16 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   </details>
 
-- [ ] **C06 — Media bersama** · BELUM
+- [ ] **C06 — Media bersama** · SEBAGIAN
 
   <details>
   <summary>Detail dan bukti</summary>
 
-  Status: BELUM | PRD: CORE 05 | Bergantung pada: D03; D08; aturan quota
+  Status: SEBAGIAN | PRD: CORE 05 | Bergantung pada: D03; D08; aturan quota
 
-  Penerimaan / tindakan: Validasi MIME/ukuran, kepemilikan tenant, upload storage, signed URL privat dan penghapusan/retensi; uji file invalid, gagal upload dan akses silang.
+  Penerimaan / tindakan: Upload privat, validasi MIME/ukuran dan isolasi tenant tersedia. S3/CDN, signed URL, retensi dan penghapusan belum selesai.
 
-  Bukti awal / lokasi: Tambahkan tautan implementasi, migration dan hasil tes saat dikerjakan.
+  Bukti awal / lokasi: app/Modules/Core/Media; core_media; config/core_media.php; migration 000011 mempertahankan ID/path/referensi; tes migrasi lulus.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -496,31 +514,31 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
 ## 5. Wedding MVP
 
-- [ ] **W01 — Dashboard dan template** · SEBAGIAN
+- [x] **W01 — Dashboard dan template** · TERSEDIA
 
   <details>
   <summary>Detail dan bukti</summary>
 
-  Status: SEBAGIAN | PRD: WED 01 | Bergantung pada: C10; D04
+  Status: TERSEDIA | PRD: WED 01 | Bergantung pada: C10; D04
 
-  Penerimaan / tindakan: Dashboard Wedding hanya untuk workspace berhak; template aktif menghasilkan draft milik tenant; template nonaktif ditolak.
+  Penerimaan / tindakan: Dashboard berhak akses dan pemilihan tiga tema dari allowlist konfigurasi menghasilkan draft tenant; nama template di luar allowlist ditolak.
 
-  Bukti awal / lokasi: Editor/dashboard Wedding dasar dengan satu tampilan; pemilihan template belum tersedia. Detail: WEDDING_LIFECYCLE.md.
+  Bukti awal / lokasi: Wedding/Edit.vue, config/wedding_editor.php, SaveInvitationRequest; WeddingEditorExperienceTest. Admin katalog template belum tersedia.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
   </details>
 
-- [ ] **W02 — Editor konten dan media** · SEBAGIAN
+- [x] **W02 — Editor konten dan media** · TERSEDIA
 
   <details>
   <summary>Detail dan bukti</summary>
 
-  Status: SEBAGIAN | PRD: WED 02 | Bergantung pada: W01; C06
+  Status: TERSEDIA | PRD: WED 02 | Bergantung pada: W01; C06
 
-  Penerimaan / tindakan: Data pasangan/event/lokasi/tema/media sesuai field final; validasi server dan sanitasi; simpan serta tampilkan kembali tanpa script pengguna.
+  Penerimaan / tindakan: Editor enam langkah mencakup pasangan, acara/lokasi, tema, cover, galeri, musik dan RSVP/wishes; validasi server dan escaping tersedia.
 
-  Bukti awal / lokasi: Nama pasangan, tanggal, lokasi dan pesan tersedia; validasi server serta escaping. Upload media dan scope konten lengkap belum. Detail: WEDDING_LIFECYCLE.md.
+  Bukti awal / lokasi: WEDDING_STUDIO.md; Core Media; WeddingEditorExperienceTest. Batas upload teknis dicatat terpisah dari kuota komersial.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -550,7 +568,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Subdomain unik, entitlement/kuota dicek; publish gagal tidak dicatat sukses; alamat publik menampilkan versi yang benar.
 
-  Bukti awal / lokasi: Belum ada modul bisnis Wedding pada source yang diperiksa.
+  Bukti awal / lokasi: Modul Wedding dasar sudah tersedia (editor teks, preview, publish URL lokal). Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -571,16 +589,16 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   </details>
 
-- [ ] **W06 — Guest, RSVP dan wishes** · OPSIONAL
+- [ ] **W06 — Guest, RSVP dan wishes** · SEBAGIAN
 
   <details>
   <summary>Detail dan bukti</summary>
 
-  Status: OPSIONAL | PRD: WED 04 | Bergantung pada: D04; W04
+  Status: SEBAGIAN | PRD: WED 04 | Bergantung pada: D04; W04
 
-  Penerimaan / tindakan: Hanya jika masuk scope: respons tervalidasi/rate-limited, daftar tamu tetap privat, owner melihat respons undangannya.
+  Penerimaan / tindakan: RSVP/wishes masuk scope dan tersedia dengan validasi, throttle, idempotensi, ringkasan privat serta moderasi wishes. Daftar tamu personal belum tersedia.
 
-  Bukti awal / lokasi: Belum ada modul bisnis Wedding pada source yang diperiksa.
+  Bukti awal / lokasi: ResponseController; wedding_responses; Wedding/Edit.vue; wedding/invitation.blade.php; tes akses silang dan moderasi lulus.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -595,7 +613,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Daftar → bayar → entitlement → konten → preview → publish pada staging; uji gagal/akses ilegal; catat persetujuan owner sebelum rilis.
 
-  Bukti awal / lokasi: Belum ada modul bisnis Wedding pada source yang diperiksa.
+  Bukti awal / lokasi: Modul Wedding dasar sudah tersedia (editor teks, preview, publish URL lokal). Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 
@@ -610,7 +628,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
   Penerimaan / tindakan: Builder lanjutan/otomasi domain opsional P2. Domain .com manual paket Diamond tetap harus dipenuhi pada C08/W04 sebelum penawaran komersial; bukan manfaat opsional.
 
-  Bukti awal / lokasi: Belum ada modul bisnis Wedding pada source yang diperiksa.
+  Bukti awal / lokasi: Modul Wedding dasar sudah tersedia (editor teks, preview, publish URL lokal). Fitur pada item ini belum lengkap; lihat WEDDING_LIFECYCLE.md dan UAT_WEDDING.md.
 
   PIC: __________ · Tanggal: __________ · Bukti/hasil: __________
 

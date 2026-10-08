@@ -29,3 +29,5 @@ Route::middleware(['auth', 'verified', 'role:super-admin'])->prefix('admin/produ
     Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
     Route::patch('/{product}', [ProductController::class, 'update'])->middleware('throttle:30,1')->name('update');
 });
+
+Route::get('/products/{slug}', \App\Modules\Core\Catalog\Http\Controllers\ProductPlansController::class)->middleware(['auth', 'verified'])->name('products.plans');

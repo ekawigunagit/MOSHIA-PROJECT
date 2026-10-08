@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import MoshiaLayout from '@/Layouts/MoshiaLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import PaymentCountdown from '@/Components/PaymentCountdown.vue';
@@ -9,7 +9,8 @@ import { statusLabels, rupiah, dateTime } from '@/billing';
 
 const props = defineProps({ workspace: Object, packages: Array, bank: Object, orders: Object, serverNow: String });
 const liveOrders = usePaymentCountdown(() => props.orders.data, () => props.serverNow);
-const form = useForm({ package: '' });
+const requestedPackage = new URL(usePage().url, 'https://moshia.local').searchParams.get('package');
+const form = useForm({ package: props.packages.some(plan => plan.key === requestedPackage) ? requestedPackage : '' });
 const cancellation = useForm({});
 const selectedPackage = computed(() => props.packages.find((plan) => plan.key === form.package));
 const hasPendingOrder = computed(() => liveOrders.value.some((order) => order.status === 'pending_payment'));

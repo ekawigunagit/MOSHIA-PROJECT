@@ -58,9 +58,8 @@ function selectWorkspace(event) {
                 </div>
                 <ProductCatalog :products="products" show-access>
                     <template #actions="{ product }">
-                        <div v-if="product.slug === 'wedding' && $page.props.developmentPayments" class="dashboard-actions">
-                            <Link v-if="activeWorkspace" :href="route('billing.index', activeWorkspace.id)" class="button button-primary">Lihat paket</Link>
-                            <p v-else>Buat workspace terlebih dahulu untuk melihat paket.</p>
+                        <div v-if="product.slug === 'wedding'" class="dashboard-actions">
+                            <Link :href="route('products.plans', { slug: 'wedding' })" class="button button-primary">Lihat paket</Link>
                         </div>
                     </template>
                 </ProductCatalog>
