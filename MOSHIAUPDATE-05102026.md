@@ -8,11 +8,11 @@ Gunakan bagian terbaru ini dan pembaruan 6 Oktober di bawah sebagai acuan. Catat
 
 ### Database yang dibawa
 
-- **File terbaru: `exports/database/moshia-20261006-072406.sql`** (07:24:06 Asia/Bangkok).
+- **File terbaru: `exports/database/moshia-20261006-101641.sql`** (10:16:41 Asia/Bangkok).
 - Ukuran 34.147 byte; 22 tabel. Mencakup struktur/data akun, role, workspace, paket, notifikasi, entitlement, pesanan pembayaran dan undangan.
 - Migration lokal sampai **2026_10_05_000009_create_manual_wedding_purchases** sudah Ran. Countdown 24 jam tidak memerlukan migration baru.
-- Checksum pendamping: `exports/database/moshia-20261006-072406.sql.sha256`.
-- SHA-256: `0900ce752b6acd4e30e3337a07a138908434abe991dab13b8ca3cde59c935948`.
+- Checksum pendamping: `exports/database/moshia-20261006-101641.sql.sha256`.
+- SHA-256: `5699a5446fffa4125e09c0509c2375931533552e374a58f59c775e85da5d7e86`.
 - Export mysqldump selesai dengan exit 0, tanpa warning; penanda selesai dan tabel penting diperiksa. **Restore belum diuji.** Database sumber tidak diubah oleh ekspor.
 - Folder `exports/database/` diabaikan Git. Dump mengandung data pribadi/password hash; kirim melalui saluran privat. Jangan unggah ke repository publik.
 - `dbmoshia.sql` di root adalah ekspor lama; gunakan file bertanggal di atas untuk perpindahan kali ini. File lama dipertahankan.
@@ -44,7 +44,7 @@ Alur manual, countdown dan editor teks dasar sudah tersedia; jangan dibangun ula
 
 Prompt pembuka di device tujuan:
 
-> Baca MOSHIAUPDATE-05102026.md, khususnya pembaruan 6 Oktober 2026, serta docs/planning/WEDDING_LIFECYCLE.md dan CHECKLIST.md. Periksa source dan hasil import exports/database/moshia-20261006-072406.sql. Pembayaran manual, countdown 24 jam dan editor Wedding dasar sudah dibuat; lanjutkan dari UAT dan pekerjaan checklist berikutnya. Jangan reset database atau ulangi fitur yang tersedia. Setiap npm run build/dev wajib approval tool.
+> Baca MOSHIAUPDATE-05102026.md, khususnya pembaruan 6 Oktober 2026, serta docs/planning/WEDDING_LIFECYCLE.md dan CHECKLIST.md. Periksa source dan hasil import exports/database/moshia-20261006-101641.sql. Pembayaran manual, countdown 24 jam dan editor Wedding dasar sudah dibuat; lanjutkan dari UAT dan pekerjaan checklist berikutnya. Jangan reset database atau ulangi fitur yang tersedia. Setiap npm run build/dev wajib approval tool.
 
 ## Pembaruan tampilan — 6 Oktober 2026
 
