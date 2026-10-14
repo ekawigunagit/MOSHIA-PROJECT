@@ -1,3 +1,5 @@
+> Update 14 Oktober: [Susunan undangan, video dan Wedding Gift](INVITATION_SECTIONS.md). Hasil terbaru dan batas UAT ada di CHECKLIST.md.
+
 > Update aktif 8 Oktober 2026: baca [Wedding Studio](WEDDING_STUDIO.md), [arsitektur dan nama tabel](MODULAR_MONOLITH.md), serta [CHECKLIST.md](CHECKLIST.md). Editor/template/media/RSVP/wishes sudah tersedia untuk pembayaran manual development. Suite terbaru 185 tes / 1.611 assertions. Catatan 5 Oktober di bawah adalah riwayat; checklist Word belum disinkronkan dengan perubahan terbaru.
 
 # Dokumen perencanaan Moshia — 5 Oktober 2026

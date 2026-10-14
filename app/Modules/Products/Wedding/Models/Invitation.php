@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Wedding\Models;
+namespace App\Modules\Products\Wedding\Models;
 
 use App\Modules\Core\Billing\Models\PurchaseOrder;
 use Illuminate\Database\Eloquent\Model;

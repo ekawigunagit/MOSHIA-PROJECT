@@ -1,6 +1,6 @@
 <?php
-namespace App\Modules\Wedding\Services;
-use App\Modules\Wedding\Models\Invitation;
+namespace App\Modules\Products\Wedding\Services;
+use App\Modules\Products\Wedding\Models\Invitation;
 use App\Modules\Core\Entitlement\Models\Entitlement;
 use Carbon\CarbonImmutable;
 class PublishedInvitation {
@@ -19,7 +19,10 @@ class PublishedInvitation {
         return array_values(array_filter(array_merge(
             [$content['cover_id'] ?? null, $content['partner_one_photo_id'] ?? null,
              $content['partner_two_photo_id'] ?? null, $content['music_id'] ?? null],
-            $content['gallery_ids'] ?? []
+            $content['gallery_ids'] ?? [],
+            [$content['header_image_id'] ?? null, ($content['header_type'] ?? 'image') === 'video' ? ($content['header_video_id'] ?? null) : null,
+             $content['wedding_photo_id'] ?? null, $content['thank_you_image_id'] ?? null],
+            array_column($content['stories'] ?? [], 'image_id')
         )));
     }
 }

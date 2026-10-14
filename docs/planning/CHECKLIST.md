@@ -2,6 +2,33 @@
 
 Diperbarui: **14 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
 
+## Susunan undangan lengkap — 14 Oktober 2026
+
+- W02: sembilan bagian undangan, upload per penempatan, video Emerald/Diamond, cerita dinamis, Gift dan penutup tersedia. Galeri/musik/RSVP dipertahankan. Detail: [INVITATION_SECTIONS.md](INVITATION_SECTIONS.md).
+- Core Catalog: core_banks dan menu tambah bank superadmin tersedia; enam bank awal melalui migration 000012 berhasil. Domain invitation.moshia.id disiapkan via konfigurasi, DNS/HTTPS/deployment belum dilakukan. W04 tetap belum selesai.
+- Suite penuh **204 tes / 2.005 assertions** lulus; build disetujui **818 modul**. Browser fixture desktop/mobile dan tambah/hapus cerita diuji tanpa error runtime. UAT video nyata/production pending. Tidak mencentang pekerjaan parsial.
+
+## Detail acara — 14 Oktober 2026
+
+- W02: nama acara utama default Pemberkatan Pernikahan dapat diedit. Resepsi opsional memakai checkbox; memiliki nama, tanggal/jam, tempat/alamat dan peta terpisah. Saat nonaktif, isian dipertahankan tetapi acara disembunyikan dari undangan.
+- Tes Wedding **17 tes / 201 assertions** lulus; build disetujui **816 modul**. UAT browser pending; centang tidak diubah. Detail pada handoff hari ini.
+
+## Upload foto pasangan — 14 Oktober 2026
+
+- W02: upload langsung Foto Pengantin Pria/Wanita tersedia, dengan progres, error dan pemilihan otomatis media hasil upload. Isian draft/identitas tetap terjaga saat posisi ditukar. Simpan draft dan Publish tetap diperlukan.
+- Tes Wedding **15 tes / 176 assertions** lulus; build disetujui **816 modul**. UAT browser pending; status centang tetap. Detail pada handoff hari ini.
+
+## Penyelarasan modular — 14 Oktober 2026
+
+- Wedding berada di Modules/Products/Wedding; provider Gate abilities khusus produk dan middleware can tersedia, tetap owner/entitlement scoped. Tidak mengubah role akun.
+- Prefix route/tabel yang sudah sesuai dipertahankan; unggahan baru memakai workspaces/{id}/wedding, path lama tetap kompatibel. Queue/VPS masih rencana, bukan implementasi deployment.
+- Suite penuh terbaru **197 tes / 1.907 assertions** lulus; diff whitespace lulus. Tidak build frontend ulang untuk refactor backend. Centang parsial tetap. Lihat [arsitektur](MODULAR_MONOLITH.md).
+
+## Detail pasangan — 14 Oktober 2026
+
+- W02: label pria/wanita, nama bapak/ibu terpisah, tombol tukar posisi atas–bawah tersedia. Identitas/foto/keluarga tidak ditukar; urutan mengikuti draft dan snapshot publik. Teks keluarga lama dipertahankan sebagai fallback.
+- WeddingEditorExperienceTest: **14 tes / 166 assertions** lulus; build disetujui **816 modul**. UAT browser belum dilakukan; centang keseluruhan tidak berubah. Detail di [handoff hari ini](../update/MOSHIAUPDATE-14102026.md).
+
 ## Pembaruan 14 Oktober 2026
 
 - Audit handoff terhadap komunikasi: laporan UAT 1–3 konsisten, poin 4–5 masih pending. Detail loading/My Transaction, ringkasan settled product/Manage, keputusan workspace dan persiapan pindah device dikonsolidasikan di [MOSHIAUPDATE-14102026.md](../update/MOSHIAUPDATE-14102026.md).

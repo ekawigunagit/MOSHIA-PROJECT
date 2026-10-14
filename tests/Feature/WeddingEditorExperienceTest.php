@@ -5,9 +5,9 @@ use App\Models\User;
 use App\Modules\Core\Billing\Actions\ManualWeddingBilling;
 use App\Modules\Core\Tenancy\Actions\CreateWorkspace;
 use App\Modules\Core\Tenancy\Models\Tenant;
-use App\Modules\Wedding\Models\Invitation;
+use App\Modules\Products\Wedding\Models\Invitation;
 use App\Modules\Core\Media\Models\Media;
-use App\Modules\Wedding\Models\GuestResponse;
+use App\Modules\Products\Wedding\Models\GuestResponse;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -56,6 +56,164 @@ class WeddingEditorExperienceTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $migration->down();
     }
+
+    public function test_parent_names_and_order_follow_draft_and_published_snapshots(): void {
+        $details = [
+            'partner_one' => 'Pria Alpha', 'partner_two' => 'Wanita Beta',
+            'partner_one_father' => 'Ayah Alpha', 'partner_one_mother' => 'Ibu Alpha',
+            'partner_two_father' => 'Ayah Beta', 'partner_two_mother' => '<script>Nama Ibu</script>',
+            'partner_order' => 'bride_first',
+        ];
+        $this->save($details);
+        $this->assertSame('Ayah Alpha', $this->invitation()->draft_content['partner_one_father']);
+        $this->get(route('wedding.preview', $this->tenant))->assertOk()
+            ->assertSeeInOrder(['Wanita Beta', 'Pria Alpha'])
+            ->assertSee('Ayah Alpha')->assertSee('Ibu Alpha')->assertSee('Ayah Beta')
+            ->assertSee('&lt;script&gt;Nama Ibu&lt;/script&gt;', false)
+            ->assertDontSee('<script>Nama Ibu</script>', false);
+        $this->publish();
+        $slug = $this->invitation()->slug;
+        $this->save(array_replace($details, ['partner_order' => 'groom_first']));
+        $this->get(route('wedding.preview', $this->tenant))->assertSeeInOrder(['Pria Alpha', 'Wanita Beta']);
+        $this->get(route('wedding.public', $slug))->assertSeeInOrder(['Wanita Beta', 'Pria Alpha']);
+        $this->publish();
+        $this->get(route('wedding.public', $slug))->assertSeeInOrder(['Pria Alpha', 'Wanita Beta']);
+        $this->assertSame('Ayah Beta', $this->invitation()->published_content['partner_two_father']);
+    }
+
+    public function test_legacy_family_text_and_default_order_remain_supported(): void {
+        $this->save(['partner_one_parents' => 'Keluarga Lama Alpha']);
+        $this->get(route('wedding.preview', $this->tenant))->assertOk()
+            ->assertSeeInOrder(['Ayu', 'Eka'])->assertSee('Keluarga Lama Alpha');
+        $this->save(['partner_one_parents' => 'Keluarga Lama Alpha', 'partner_one_father' => 'Nama Bapak Baru']);
+        $this->get(route('wedding.preview', $this->tenant))->assertSee('Nama Bapak Baru')->assertDontSee('Keluarga Lama Alpha');
+        $this->assertSame('Keluarga Lama Alpha', $this->invitation()->draft_content['partner_one_parents']);
+    }
+
+    public function test_invalid_partner_order_and_parent_names_do_not_replace_saved_draft(): void {
+        $this->save();
+        $before = $this->invitation()->draft_content;
+        $this->patch(route('wedding.update', $this->tenant), $this->content([
+            'partner_order' => 'unknown', 'partner_one_father' => str_repeat('x', 201),
+            'partner_one_mother' => [], 'partner_two_father' => str_repeat('y', 201),
+            'partner_two_mother' => ['invalid'],
+        ]))->assertSessionHasErrors(['partner_order','partner_one_father','partner_one_mother','partner_two_father','partner_two_mother']);
+        $this->assertSame($before, $this->invitation()->draft_content);
+    }
+    public function test_product_abilities_and_workspace_storage_are_isolated(): void {
+        $this->assertTrue(\Illuminate\Support\Facades\Gate::forUser($this->owner)->allows('wedding.invitations.view', $this->tenant));
+        $media = $this->photo();
+        $this->assertStringStartsWith('workspaces/'.$this->tenant->id.'/wedding/', $media->path);
+        Storage::disk('local')->assertExists($media->path);
+        $this->actingAs($this->admin)->get(route('wedding.edit', $this->tenant))->assertForbidden();
+    }
+
+
+    public function test_event_names_reception_toggle_and_map_follow_published_snapshot(): void {
+        $details = ['event_name' => 'Akad Nikah', 'reception_enabled' => true, 'reception_name' => 'Syukuran Keluarga',
+            'reception_date' => '2027-01-02', 'reception_venue' => 'Gedung Bahagia, Jalan Mawar',
+            'reception_map_url' => 'https://maps.google.com/?q=Gedung'];
+        $this->save($details);
+        $this->get(route('wedding.preview', $this->tenant))->assertOk()->assertSee('Akad Nikah')
+            ->assertSee('Syukuran Keluarga')->assertSee('Gedung Bahagia, Jalan Mawar')->assertSee('Buka peta resepsi');
+        $this->publish();
+        $this->save(array_replace($details, ['reception_enabled' => false]));
+        $this->get(route('wedding.preview', $this->tenant))->assertDontSee('Syukuran Keluarga')->assertDontSee('Buka peta resepsi');
+        $this->assertSame('Gedung Bahagia, Jalan Mawar', $this->invitation()->draft_content['reception_venue']);
+        $this->get(route('wedding.public', $this->invitation()->slug))->assertSee('Syukuran Keluarga');
+        $this->publish();
+        $this->get(route('wedding.public', $this->invitation()->slug))->assertDontSee('Syukuran Keluarga');
+    }
+
+    public function test_event_defaults_legacy_reception_and_conditional_validation(): void {
+        $this->save();
+        $this->get(route('wedding.preview', $this->tenant))->assertSee('Pemberkatan Pernikahan');
+        $this->save(['reception_date' => '2027-01-02', 'reception_venue' => 'Lokasi lama']);
+        $this->get(route('wedding.preview', $this->tenant))->assertSee('Lokasi lama');
+        $this->patch(route('wedding.update', $this->tenant), $this->content([
+            'event_name' => '', 'reception_enabled' => true, 'reception_name' => '',
+            'reception_map_url' => 'javascript:alert(1)',
+        ]))->assertSessionHasErrors(['event_name','reception_name','reception_date','reception_venue','reception_map_url']);
+        $this->save(['reception_enabled' => false, 'reception_name' => '']);
+    }
+
+
+    public function test_complete_sections_and_gift_bank_snapshot_are_published_safely(): void {
+        $photo = $this->photo();
+        $bank = \App\Modules\Core\Catalog\Models\Bank::where('name', 'Bank BCA')->firstOrFail();
+        $details = [
+            'header_type' => 'image', 'header_image_id' => $photo->id,
+            'wedding_photo_id' => $photo->id, 'wedding_quote' => '<script>quote</script>',
+            'save_date_title' => 'Save Our Date', 'save_date_message' => 'Datang bersama kami',
+            'stories' => [['title' => 'Perkenalan', 'body' => 'Cerita pertama', 'image_id' => $photo->id],
+                ['title' => 'Engagement', 'body' => 'Cerita lamaran', 'image_id' => null]],
+            'gift_enabled' => true, 'gift_accounts' => [['bank_id' => $bank->id, 'account_number' => '0012345678', 'account_holder' => 'Nama Pengantin']],
+            'thank_you_image_id' => $photo->id, 'thank_you_title' => 'Thank You', 'thank_you_message' => 'Terima kasih sudah datang',
+        ];
+        $this->save($details);
+        $this->get(route('wedding.preview', $this->tenant))->assertOk()->assertSee('Cerita pertama')
+            ->assertSee('Bank BCA')->assertSee('0012345678')->assertSee('Save Our Date')
+            ->assertSee('&lt;script&gt;quote&lt;/script&gt;', false)->assertDontSee('<script>quote</script>', false)
+            ->assertSee('Thank You')->assertSee('Made with love - Moshia Invitation');
+        $this->publish();
+        $slug = $this->invitation()->slug;
+        $this->get(route('wedding.media.public', [$slug, $photo->id]))->assertOk();
+        $bank->update(['name' => 'Bank renamed']);
+        $this->get(route('wedding.public', $slug))->assertSee('Bank BCA')->assertDontSee('Bank renamed');
+        $this->save(array_replace($details, ['stories' => [], 'gift_enabled' => false]));
+        $this->get(route('wedding.preview', $this->tenant))->assertDontSee('Cerita pertama')->assertDontSee('0012345678');
+        $this->get(route('wedding.public', $slug))->assertSee('Cerita pertama')->assertSee('0012345678');
+    }
+
+    public function test_gold_cannot_upload_select_or_publish_video_and_paid_tiers_can(): void {
+        $upload = fn () => UploadedFile::fake()->create('header.mp4', 100, 'video/mp4');
+        $this->post(route('wedding.media.store', $this->tenant), ['kind' => 'video', 'file' => $upload()])->assertSessionHasErrors('file');
+        $this->patch(route('wedding.update', $this->tenant), $this->content(['header_type' => 'video']))->assertSessionHasErrors('header_type');
+        $order = app(ManualWeddingBilling::class)->editorOrder($this->owner, $this->tenant);
+        foreach (['emerald', 'diamond'] as $key) {
+            $order->update(['terms' => config('wedding_plans.packages.'.$key)]);
+            $this->post(route('wedding.media.store', $this->tenant), ['kind' => 'video', 'file' => $upload()])->assertSessionHasNoErrors();
+            $media = Media::where('kind', 'video')->latest('id')->firstOrFail();
+            $this->save(['header_type' => 'video', 'header_video_id' => $media->id]);
+            $this->get(route('wedding.preview', $this->tenant))->assertOk()->assertSee('Video header pernikahan');
+        }
+        $order->update(['terms' => config('wedding_plans.packages.gold')]);
+        $this->post(route('wedding.publish', $this->tenant))->assertSessionHasErrors('publish');
+    }
+
+    public function test_section_validation_rejects_foreign_photos_invalid_banks_and_excess_stories(): void {
+        $other = User::factory()->create();
+        $tenant = app(CreateWorkspace::class)->handle($other, 'Other');
+        $media = Media::create(['tenant_id' => $tenant->id, 'collection' => 'wedding', 'kind' => 'image', 'path' => 'other.png', 'mime' => 'image/png', 'size' => 10]);
+        $this->patch(route('wedding.update', $this->tenant), $this->content([
+            'header_image_id' => $media->id, 'thank_you_image_id' => $media->id,
+            'stories' => array_fill(0, 13, ['title' => 'Story', 'body' => '', 'image_id' => $media->id]),
+            'gift_enabled' => true, 'gift_accounts' => [['bank_id' => 99999, 'account_number' => '<script>', 'account_holder' => '']],
+        ]))->assertSessionHasErrors(['header_image_id','thank_you_image_id','stories','stories.0.image_id','gift_accounts.0.bank_id','gift_accounts.0.account_number','gift_accounts.0.account_holder']);
+    }
+
+    public function test_only_superadmin_can_add_banks_for_gift_selector(): void {
+        $this->get(route('admin.banks.index'))->assertForbidden();
+        $this->post(route('admin.banks.store'), ['name' => 'Bank Customer'])->assertForbidden();
+        $this->actingAs($this->admin)->post(route('admin.banks.store'), ['name' => 'Bank Tambahan'])->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('core_banks', ['name' => 'Bank Tambahan']);
+        $this->post(route('admin.banks.store'), ['name' => 'Bank Tambahan'])->assertSessionHasErrors('name');
+        $this->actingAs($this->owner)->get(route('wedding.edit', $this->tenant))->assertInertia(fn (Assert $page) => $page
+            ->component('Wedding/Edit')->has('banks', 7)->where('videoAllowed', false));
+    }
+
+    public function test_configured_public_domain_keeps_slug_and_redirects_legacy_links(): void {
+        $this->save(); $this->publish();
+        $slug = $this->invitation()->slug;
+        config(['wedding_editor.public_domain' => 'invitation.moshia.test']);
+        require app_path('Modules/Products/Wedding/Routes/web.php');
+        app('router')->getRoutes()->refreshNameLookups();
+        $url = route('wedding.public', $slug);
+        $this->assertStringContainsString('invitation.moshia.test/'.$slug, $url);
+        $this->get($url)->assertOk();
+        $this->get('/invitation/'.$slug.'?to=Tamu')->assertRedirect(route('wedding.public', ['slug' => $slug, 'to' => 'Tamu']));
+    }
+
     private function content(array $overrides = []): array {
         return array_replace([
             'partner_one' => 'Ayu', 'partner_two' => 'Eka', 'event_date' => '2027-01-01',
@@ -78,7 +236,9 @@ class WeddingEditorExperienceTest extends TestCase
         $this->post(route('wedding.media.store', $this->tenant), [
             'kind' => 'image', 'file' => $this->imageFile(),
         ])->assertSessionHasNoErrors();
-        return Media::where('tenant_id', $this->tenant->id)->latest('id')->firstOrFail();
+        $media = Media::where('tenant_id', $this->tenant->id)->latest('id')->firstOrFail();
+        $this->assertSame($media->id, session('wedding_uploaded_media_id'));
+        return $media;
     }
     public function test_unpublish_closes_all_public_endpoints_and_republish_preserves_period(): void {
         $photo = $this->photo();

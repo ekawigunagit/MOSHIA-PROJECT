@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Modules\Wedding\Http\Controllers;
+namespace App\Modules\Products\Wedding\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Core\Billing\Actions\ManualWeddingBilling;
 use App\Modules\Core\Tenancy\Models\Tenant;
-use App\Modules\Wedding\Http\Requests\SaveInvitationRequest;
-use App\Modules\Wedding\Models\Invitation;
+use App\Modules\Products\Wedding\Http\Requests\SaveInvitationRequest;
+use App\Modules\Products\Wedding\Models\Invitation;
 use App\Modules\Core\Media\Models\Media;
-use App\Modules\Wedding\Models\GuestResponse;
-use App\Modules\Wedding\Services\PublishedInvitation;
+use App\Modules\Products\Wedding\Models\GuestResponse;
+use App\Modules\Products\Wedding\Services\PublishedInvitation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -25,6 +25,9 @@ class InvitationController extends Controller
             'workspace' => $tenant->only('id', 'name'),
             'invitation' => $invitation->only('draft_content', 'published_at'),
             'order' => $order->only('id', 'terms', 'first_published_at', 'ends_at'),
+            'banks' => \App\Modules\Core\Catalog\Models\Bank::orderBy('name')->get(['id','name']),
+            'videoAllowed' => \App\Modules\Products\Wedding\Services\WeddingFeatures::videoHeader($order),
+            'uploadedMediaId' => $request->session()->get('wedding_uploaded_media_id'),
             'publicUrl' => route('wedding.public', $invitation->slug),
             'templates' => collect(config('wedding_editor.templates'))->map(fn ($t, $key) => ['key' => $key, ...$t])->values(),
             'media' => Media::where('tenant_id', $tenant->id)->where('collection', 'wedding')->latest('id')->get()->map(fn ($m) => [
@@ -38,6 +41,7 @@ class InvitationController extends Controller
                 'pendingWishes' => (clone $responses)->whereNotNull('wish')->where('approved', false)->count(),
             ],
             'limits' => [
+                'videoKb' => config('core_media.video_kb'), 'stories' => config('wedding_editor.story_items'), 'gifts' => config('wedding_editor.gift_accounts'),
                 'imageKb' => config('core_media.image_kb'), 'musicKb' => config('core_media.music_kb'),
                 'gallery' => config('wedding_editor.gallery_items'), 'files' => config('core_media.items_per_workspace_collection'),
             ],
@@ -46,7 +50,11 @@ class InvitationController extends Controller
 
     public function update(SaveInvitationRequest $request, Tenant $tenant, ManualWeddingBilling $billing)
     {
-        $billing->saveContent($request->user(), $tenant, $request->validated());
+        $content = $request->validated();
+        foreach ($content['gift_accounts'] ?? [] as $index => $gift) {
+            $content['gift_accounts'][$index]['bank_name'] = \App\Modules\Core\Catalog\Models\Bank::findOrFail($gift['bank_id'])->name;
+        }
+        $billing->saveContent($request->user(), $tenant, $content);
         return back()->with('success', 'Draft tersimpan. Preview sudah diperbarui; halaman publik berubah setelah Publish.');
     }
 

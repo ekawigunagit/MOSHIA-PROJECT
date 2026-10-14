@@ -23,6 +23,7 @@ const navigation = computed(() => [
         { route: 'admin.index', label: 'Dashboard Admin', icon: 'home' },
         { route: 'admin.users.index', active: 'admin.users.*', label: 'Pengguna & Role', icon: 'users' },
         { route: 'admin.products.index', active: 'admin.products.*', label: 'Katalog Produk', icon: 'box' },
+        { route: 'admin.banks.index', active: 'admin.banks.*', label: 'Bank Wedding Gift', icon: 'card' },
         { route: 'admin.plans.index', active: 'admin.plans.*', label: 'Draft Paket', icon: 'grid' },
         ...(page.props.developmentPayments ? [{ route: 'admin.payments.index', active: 'admin.payments.*', label: 'Pembayaran Manual', icon: 'card' }] : []),
     ] : []),

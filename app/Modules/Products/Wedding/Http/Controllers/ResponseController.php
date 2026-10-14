@@ -1,9 +1,9 @@
 <?php
-namespace App\Modules\Wedding\Http\Controllers;
+namespace App\Modules\Products\Wedding\Http\Controllers;
 use App\Http\Controllers\Controller;
-use App\Modules\Wedding\Models\GuestResponse;
-use App\Modules\Wedding\Models\Invitation;
-use App\Modules\Wedding\Services\PublishedInvitation;
+use App\Modules\Products\Wedding\Models\GuestResponse;
+use App\Modules\Products\Wedding\Models\Invitation;
+use App\Modules\Products\Wedding\Services\PublishedInvitation;
 use App\Modules\Core\Billing\Actions\ManualWeddingBilling;
 use App\Modules\Core\Tenancy\Models\Tenant;
 use Illuminate\Http\Request;

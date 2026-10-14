@@ -12,12 +12,12 @@ use Illuminate\Validation\ValidationException;
 class StoreMedia {
     public function handle(User $user, Tenant $tenant, UploadedFile $file, string $kind, string $collection): Media {
         Validator::make(compact('kind', 'collection'), [
-            'kind' => ['required', Rule::in(['image','music'])],
+            'kind' => ['required', Rule::in(['image','music','video'])],
             'collection' => ['required', Rule::in(config('core_media.collections'))],
         ])->validate();
         Validator::make(['file' => $file], ['file' => $kind === 'image'
             ? ['required','file','image','mimes:jpg,jpeg,png,webp','max:'.config('core_media.image_kb'),'dimensions:max_width=8000,max_height=8000']
-            : ['required','file','mimes:mp3','max:'.config('core_media.music_kb')]])->validate();
+            : ($kind === 'video' ? ['required','file','mimes:mp4,webm','max:'.config('core_media.video_kb')] : ['required','file','mimes:mp3','max:'.config('core_media.music_kb')])])->validate();
         $disk = config('core_media.disk');
         $path = null;
         try {
@@ -29,7 +29,7 @@ class StoreMedia {
                     >= config('core_media.items_per_workspace_collection')) {
                     throw ValidationException::withMessages(['file' => 'Batas teknis media tercapai. Hubungi pengelola untuk membersihkan file yang tidak dipakai.']);
                 }
-                $path = $file->store('media/'.$tenant->id.'/'.$collection, $disk);
+                $path = $file->store('workspaces/'.$tenant->id.'/'.$collection, $disk);
                 if (! $path) { throw ValidationException::withMessages(['file' => 'Penyimpanan file gagal. Coba kembali.']); }
                 return Media::create(['tenant_id' => $tenant->id, 'collection' => $collection, 'kind' => $kind,
                     'path' => $path, 'mime' => $file->getMimeType(), 'size' => $file->getSize()]);

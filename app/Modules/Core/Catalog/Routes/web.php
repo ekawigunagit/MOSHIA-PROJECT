@@ -34,3 +34,8 @@ Route::middleware(['auth', 'verified', 'role:super-admin'])->prefix('admin/produ
 });
 
 Route::get('/products/{slug}', \App\Modules\Core\Catalog\Http\Controllers\ProductPlansController::class)->middleware(['auth', 'verified'])->name('products.plans');
+
+Route::middleware(['auth', 'verified', 'role:super-admin'])->prefix('admin/banks')->name('admin.banks.')->group(function () {
+    Route::get('/', [\App\Modules\Core\Catalog\Http\Controllers\BankController::class, 'index'])->name('index');
+    Route::post('/', [\App\Modules\Core\Catalog\Http\Controllers\BankController::class, 'store'])->middleware('throttle:20,1')->name('store');
+});

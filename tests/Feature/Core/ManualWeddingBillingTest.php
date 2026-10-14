@@ -10,7 +10,7 @@ use App\Modules\Core\Entitlement\Models\Entitlement;
 use App\Modules\Core\Notification\Actions\RecordNotification;
 use App\Modules\Core\Tenancy\Actions\CreateWorkspace;
 use App\Modules\Core\Tenancy\Models\Tenant;
-use App\Modules\Wedding\Models\Invitation;
+use App\Modules\Products\Wedding\Models\Invitation;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;

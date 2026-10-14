@@ -11,7 +11,7 @@ use App\Modules\Core\Catalog\Models\Product;
 use App\Modules\Core\Entitlement\Models\Entitlement;
 use App\Modules\Core\Notification\Actions\RecordNotification;
 use App\Modules\Core\Tenancy\Models\Tenant;
-use App\Modules\Wedding\Models\Invitation;
+use App\Modules\Products\Wedding\Models\Invitation;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -148,6 +148,10 @@ class ManualWeddingBilling
             $invitation = Invitation::where('tenant_id', $tenant->id)->lockForUpdate()->firstOrFail();
             if (! $invitation->draft_content) {
                 throw ValidationException::withMessages(['publish' => 'Simpan konten undangan sebelum Publish.']);
+            }
+            if ((!empty($invitation->draft_content['header_video_id']) || ($invitation->draft_content['header_type'] ?? 'image') === 'video')
+                && !\App\Modules\Products\Wedding\Services\WeddingFeatures::videoHeader($order)) {
+                throw ValidationException::withMessages(['publish' => 'Paket saat ini tidak mendukung video header. Pilih foto header dan simpan draft.']);
             }
             $at = CarbonImmutable::now();
             $purchase = $order->lifecycle()->recordSuccessfulPublish($at);

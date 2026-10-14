@@ -1,3 +1,5 @@
+> Pembaruan 14 Oktober: editor kini memiliki sembilan bagian, video header Emerald/Diamond dan Wedding Gift. Baca [INVITATION_SECTIONS.md](INVITATION_SECTIONS.md). Catatan 8 Oktober di bawah merupakan riwayat.
+
 # Wedding Studio — 8 Oktober 2026
 
 ## Tersedia pada kode

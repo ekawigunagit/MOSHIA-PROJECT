@@ -1,5 +1,5 @@
 <?php
-namespace App\Modules\Wedding\Models;
+namespace App\Modules\Products\Wedding\Models;
 use Illuminate\Database\Eloquent\Model;
 class GuestResponse extends Model {
     protected $table = 'wedding_responses';

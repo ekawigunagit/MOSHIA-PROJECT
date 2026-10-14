@@ -31,6 +31,7 @@ const items = computed(() => {
         Users: { label: 'Pengguna & Role', route: 'admin.users.index', edit: 'Edit Pengguna' },
         Products: { label: 'Katalog Produk', route: 'admin.products.index', edit: 'Edit Produk' },
         Plans: { label: 'Draft Paket', route: 'admin.plans.index', edit: page.props.plan ? 'Edit Draft Paket' : 'Buat Draft Paket' },
+        Banks: { label: 'Bank Wedding Gift', route: 'admin.banks.index' },
         Payments: { label: 'Pembayaran Manual', route: 'admin.payments.index' },
     };
     if (component.startsWith('Admin/')) {
