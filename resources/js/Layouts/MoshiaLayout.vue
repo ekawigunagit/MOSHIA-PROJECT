@@ -40,6 +40,7 @@ function itemActive(item) {
 const accountItems = [
     { section: 'information', label: 'Account information', icon: 'user' },
     { section: 'billing', label: 'Billing', icon: 'card' },
+    { section: 'transactions', label: 'My Transaction', icon: 'bag' },
     { section: 'security', label: 'Security', icon: 'shield' },
     { section: 'activity', label: 'Account activity', icon: 'clock' },
     { section: 'notifications', label: 'Notification settings', icon: 'bell' },

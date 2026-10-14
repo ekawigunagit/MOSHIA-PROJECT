@@ -1,8 +1,30 @@
 # Checklist Moshia
 
-Diperbarui: **8 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
+Diperbarui: **14 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
 
-**Aturan dokumentasi:** setiap perubahan/penambahan wajib memperbarui checklist ini dan handoff `MOSHIAUPDATE-DDMMYYYY.md` sesuai tanggal hari itu (Asia/Bangkok). Aturan persisten: `../../AGENTS.md`. Handoff hari ini: [MOSHIAUPDATE-08102026.md](../../MOSHIAUPDATE-08102026.md).
+## Pembaruan 14 Oktober 2026
+
+- Audit handoff terhadap komunikasi: laporan UAT 1–3 konsisten, poin 4–5 masih pending. Detail loading/My Transaction, ringkasan settled product/Manage, keputusan workspace dan persiapan pindah device dikonsolidasikan di [MOSHIAUPDATE-14102026.md](../update/MOSHIAUPDATE-14102026.md).
+- Git masih memiliki perubahan dan file baru belum di-commit saat audit. Source saja tidak membawa database, konfigurasi privat atau media; sesi ini tidak melakukan ekspor DB/commit/push. Perubahan dokumentasi saja, diff whitespace diperiksa; tidak build/test ulang dan tidak mengubah centang fitur.
+
+## Pembaruan 12 Oktober 2026
+
+- Pengguna melaporkan sudah menguji poin 1–3: workspace, pembelian paket, dan penerimaan pembayaran manual/Subscription/akses editor sebelum Publish. Tidak ada masalah dilaporkan pada pesan ini; ini laporan pengguna, bukan tes ulang agen atau bukti semua skenario edge case.
+- Poin 4 (konten, media, Preview, Publish pertama) dan poin 5 (ponsel, RSVP/ucapan, Unpublish/Publish ulang) masih menunggu pengujian pengguna. Status penyelesaian fitur dan centang luas tidak berubah; UAT belum selesai seluruhnya.
+- Handoff terbaru: [MOSHIAUPDATE-12102026.md](../update/MOSHIAUPDATE-12102026.md). Perubahan dokumentasi saja; tidak menjalankan build/tes aplikasi sesi ini.
+
+## Pembaruan 10 Oktober 2026
+
+- S03/C03: ringkasan Produk Anda di workspace menampilkan produk Wedding yang pembayaran manualnya telah diterima, label workspace/paket/status/masa aktif dan Manage menuju editor/Preview. Owner-only, terikat workspace aktif, order/entitlement harus mengizinkan editor; tidak memulai masa aktif. WorkspaceProductsTest **1 tes / 62 assertions** lulus; build disetujui berhasil **816 modul**, diff whitespace lulus; UAT browser pending. Status centang tetap.
+
+- Aturan dokumentasi diperbarui: seluruh handoff harian dibuat/diperbarui di `docs/update/`, sesuai instruksi pengguna 10 Oktober. AGENTS.md dan tautan checklist diselaraskan; perubahan dokumentasi saja, tanpa build/test ulang dan tanpa perubahan centang.
+
+- S03/C03: My Transaction pada menu profil menampilkan semua status pesanan dengan label workspace, nominal, tanggal dan pagination. Pending payment dapat dilanjutkan ke billing tenant pesanan; query owner-only termasuk admin. ProfileBillingHistoryTest **3 tes / 97 assertions** lulus; build disetujui **816 modul**, diff whitespace lulus. UAT browser pending; status centang tetap.
+
+- S03: loading logo global untuk navigasi/form Inertia, ring merah 64 px dan logo 28 px. Loading checkout disatukan; notifikasi Axios memakai indikator di panel. Tidak memberi delay buatan untuk aksi instan. UAT browser sukses/error/cancel/upload/mobile masih pending; status centang tetap.
+- Handoff terbaru: [MOSHIAUPDATE-10102026.md](../update/MOSHIAUPDATE-10102026.md). Pemeriksaan whitespace lulus. Build setelah persetujuan berhasil **816 modul**; backend tidak diubah/diuji ulang pada sesi ini.
+
+**Aturan dokumentasi:** setiap perubahan/penambahan wajib memperbarui checklist ini dan handoff `docs/update/MOSHIAUPDATE-DDMMYYYY.md` sesuai tanggal hari itu (Asia/Bangkok). Aturan persisten: `../../AGENTS.md`. Handoff hari ini: [MOSHIAUPDATE-14102026.md](../update/MOSHIAUPDATE-14102026.md).
 
 ## Pembaruan terakhir — keranjang dan dokumentasi harian
 
@@ -920,7 +942,7 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 
 - [PRD lengkap](Moshia_PRD_v1.2_2026-10-05.docx)
 - [Checklist Word v1.2](MOSHIACHEKLIST.docx) — diselaraskan dengan checklist Markdown pada 5 Oktober 2026.
-- [Status implementasi / handoff](../../MOSHIAUPDATE-05102026.md)
+- [Status implementasi / handoff](../update/MOSHIAUPDATE-05102026.md)
 - [Pembayaran manual dan lifecycle Wedding](WEDDING_LIFECYCLE.md)
 - [Excel paket untuk diisi](../../exports/MOSHIA_DRAFT_PAKET_2026-10-02_194603.xlsx)
 

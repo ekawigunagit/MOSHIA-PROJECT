@@ -4,7 +4,6 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import MoshiaLayout from '@/Layouts/MoshiaLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import PaymentCountdown from '@/Components/PaymentCountdown.vue';
-import MoshiaLoading from '@/Components/MoshiaLoading.vue';
 import { usePaymentCountdown } from '@/Composables/usePaymentCountdown';
 import { statusLabels, rupiah, dateTime } from '@/billing';
 
@@ -79,8 +78,7 @@ function cancel(order) {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
                     </button>
                 </div>
-                <MoshiaLoading v-if="form.processing" />
-                <div v-show="!form.processing" class="space-y-6">
+                <div class="space-y-6">
                 <Link :href="route('products.plans', 'wedding')" class="inline-block text-sm underline">Ganti paket</Link>
                 <section class="rounded-2xl border border-red-200 bg-red-50 p-5 dark:border-red-900 dark:bg-red-950/20" aria-label="Paket pilihan">
                     <div class="flex flex-wrap justify-between gap-3">

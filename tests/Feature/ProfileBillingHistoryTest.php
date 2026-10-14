@@ -36,6 +36,17 @@ class ProfileBillingHistoryTest extends TestCase
                 ->missing('billingHistory.data.0.accepted_by')
                 ->missing('billingHistory.data.0.terms'));
         $this->get('/profile')->assertInertia(fn (Assert $page) => $page->where('billingHistory', null));
+        $second = app(CreateWorkspace::class)->handle($owner, 'Workspace kedua');
+        $secondOrder = app(ManualWeddingBilling::class)->create($owner, $second, 'emerald');
+        $this->get('/profile?section=transactions')->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->has('billingHistory.data', 2)
+            ->where('billingHistory.data.0.id', $secondOrder->id)
+            ->where('billingHistory.data.0.tenant_id', $second->id)
+            ->where('billingHistory.data.0.workspace', 'Workspace kedua')
+            ->where('billingHistory.data.0.status', 'pending_payment')
+            ->where('billingHistory.data.1.tenant_id', $mine->id)
+            ->where('billingHistory.data.1.workspace', 'Mine')
+            ->where('subscriptions', null));
     }
 
     public function test_subscriptions_exclude_unpaid_expired_revoked_and_foreign_packages(): void

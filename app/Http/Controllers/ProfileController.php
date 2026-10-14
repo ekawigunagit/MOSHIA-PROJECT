@@ -44,7 +44,7 @@ class ProfileController extends Controller
                         'starts_at' => $order->first_published_at, 'ends_at' => $order->ends_at,
                         'status' => $order->statusAt(\Carbon\CarbonImmutable::now())->value,
                     ]) : null,
-            'billingHistory' => $request->query('section') === 'billing'
+            'billingHistory' => in_array($request->query('section'), ['billing', 'transactions'], true)
                 ? \App\Modules\Core\Billing\Models\PurchaseOrder::query()
                     ->whereHas('tenant', fn ($query) => $query->where('owner_id', $request->user()->id))
                     ->with('tenant:id,name')
@@ -56,6 +56,7 @@ class ProfileController extends Controller
                         'package' => $order->terms['label'] ?? $order->terms['key'] ?? 'Wedding',
                         'amount' => $order->terms['price_amount'],
                         'paid_at' => $order->paid_at,
+                        'created_at' => $order->created_at,
                         'status' => $order->statusAt(\Carbon\CarbonImmutable::now())->value,
                     ])
                 : null,

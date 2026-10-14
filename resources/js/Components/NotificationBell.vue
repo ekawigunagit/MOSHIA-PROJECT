@@ -1,5 +1,6 @@
 <script setup>
 import axios from 'axios';
+import MoshiaLoading from '@/Components/MoshiaLoading.vue';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 
@@ -142,7 +143,7 @@ onUnmounted(() => {
                 <p>{{ error }}</p>
                 <button type="button" class="mt-2 text-red-500 underline" :disabled="saving" @click="load()">Muat ulang</button>
             </div>
-            <p v-if="loading && !items.length" role="status" class="p-5 text-sm text-[var(--muted)]">Memuat notifikasi...</p>
+            <MoshiaLoading v-if="loading || saving" :label="saving ? 'Memproses…' : 'Memuat notifikasi…'" />
             <p v-else-if="!items.length && !error" class="p-5 text-sm leading-6 text-[var(--muted)]">Belum ada notifikasi. Aktivitas baru seperti membuat workspace atau menyimpan draft paket akan muncul di sini.</p>
             <ul v-if="items.length" class="divide-y divide-[var(--line)]">
                 <li v-for="item in items" :key="item.id" class="p-4" :class="{ 'bg-red-500/5': !item.read_at }">

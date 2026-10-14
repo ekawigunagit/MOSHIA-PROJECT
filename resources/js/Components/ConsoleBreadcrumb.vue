@@ -8,7 +8,7 @@ const items = computed(() => {
     const component = page.component;
     const query = new URL(page.url, 'https://moshia.local').searchParams;
     if (component === 'Profile/Edit') {
-        const sections = { information: 'Account information', security: 'Security', activity: 'Account activity', notifications: 'Notification settings' };
+        const sections = { information: 'Account information', transactions: 'My Transaction', security: 'Security', activity: 'Account activity', notifications: 'Notification settings' };
         if (query.get('section') === 'billing') {
             const tabs = { subscription: 'Subscription', history: 'Payment History', method: 'Payment Method' };
             return [{ label: 'Billing', href: route('profile.edit', { section: 'billing' }) }, { label: tabs[query.get('billing_tab')] ?? 'Subscription' }];

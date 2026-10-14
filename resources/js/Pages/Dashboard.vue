@@ -1,6 +1,7 @@
 <script setup>
 import MoshiaLayout from '@/Layouts/MoshiaLayout.vue';
 import ProductCatalog from '@/Components/ProductCatalog.vue';
+import { dateTime, statusLabels } from '@/billing';
 
 import { Head, Link } from '@inertiajs/vue3';
 
@@ -9,6 +10,7 @@ const props = defineProps({
     workspaces: { type: Array, default: () => [] },
     activeWorkspace: { type: Object, default: null },
     canManageWorkspace: Boolean,
+    settledProducts: { type: Array, default: () => [] },
 });
 </script>
 
@@ -28,6 +30,24 @@ const props = defineProps({
             </section>
 
 
+
+            <section v-if="activeWorkspace" aria-labelledby="workspace-products-title" class="space-y-5">
+                <div><span class="section-kicker">PRODUK WORKSPACE</span><h2 id="workspace-products-title">Produk Anda</h2><p>Produk yang pembayarannya sudah diterima di {{ activeWorkspace.name }}.</p></div>
+                <article v-for="product in settledProducts" :key="product.id" class="detail-card">
+                    <div class="flex flex-wrap items-center justify-between gap-3"><h3>{{ product.title }} · {{ product.package }}</h3><span class="console-table-status">Pembayaran diterima</span></div>
+                    <p class="mt-3">Workspace: {{ activeWorkspace.name }} · Pesanan #{{ product.id }}</p>
+                    <p>Status paket: {{ statusLabels[product.status] ?? product.status }}</p>
+                    <p>Diterima {{ dateTime(product.paid_at) }}</p>
+                    <p v-if="product.ends_at">Masa aktif sampai {{ dateTime(product.ends_at) }}</p>
+                    <p v-else>Masa aktif {{ product.months }} bulan dimulai saat Publish pertama.</p>
+                    <template v-if="product.can_manage">
+                        <p class="mt-4">Edit isi undangan dan simulasikan tampilannya melalui Preview di editor. Undangan baru terbuka untuk tamu setelah Anda menekan Publish.</p>
+                        <Link :href="route('wedding.edit', activeWorkspace.id)" class="button button-primary mt-4">Manage</Link>
+                    </template>
+                    <p v-else class="mt-4">Akses pengelolaan belum tersedia atau sudah berakhir. Periksa status paket pada Billing.</p>
+                </article>
+                <div v-if="!settledProducts.length" class="detail-card"><p>Belum ada produk dengan pembayaran diterima di workspace ini. Setelah admin menerima pembayaran, ringkasan produk dan tombol Manage akan muncul di sini.</p></div>
+            </section>
 
             <section id="ecosystem" class="scroll-mt-24">
                 <div class="section-heading">

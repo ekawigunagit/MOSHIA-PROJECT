@@ -12,6 +12,7 @@ const page = usePage();
 const sections = [
     { key: 'information', label: 'Account information' },
     { key: 'billing', label: 'Billing' },
+    { key: 'transactions', label: 'My Transaction' },
     { key: 'security', label: 'Security' },
     { key: 'activity', label: 'Account activity' },
     { key: 'notifications', label: 'Notification settings' },
@@ -41,10 +42,27 @@ const billingTitle = computed(() => billingTabs.find(tab => tab.key === billingT
                 <h1 class="console-profile-title">{{ billingTitle }}</h1>
             </div>
             <div v-else><h1 class="console-profile-title">{{ title }}</h1><p class="console-profile-subtitle">Kelola informasi dan preferensi akun Moshia Anda.</p></div>
-            <nav v-if="section !== 'billing'" class="console-profile-tabs" aria-label="Bagian pengaturan akun">
+            <nav v-if="!['billing', 'transactions'].includes(section)" class="console-profile-tabs" aria-label="Bagian pengaturan akun">
                 <Link v-for="item in sections" :key="item.key" :href="route('profile.edit', { section: item.key })" :class="{ active: section === item.key }" :aria-current="section === item.key ? 'page' : undefined">{{ item.label }}</Link>
             </nav>
-            <section v-if="section === 'information'" class="detail-card">
+            <section v-if="section === 'transactions'" class="detail-card">
+                <h2 class="text-xl font-semibold">Transaksi produk Anda</h2>
+                <p class="mt-2 mb-6">Setiap pesanan terhubung ke workspace tempat produk dibeli. Lanjutkan pembayaran untuk pesanan yang masih menunggu.</p>
+                <div v-if="billingHistory?.data?.length" class="space-y-4">
+                    <article v-for="order in billingHistory.data" :key="order.id" class="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
+                        <div class="flex flex-wrap items-center justify-between gap-3"><h3>#{{ order.id }} · Wedding {{ order.package }}</h3><span class="console-table-status">{{ statusLabels[order.status] ?? order.status }}</span></div>
+                        <p class="mt-3"><span class="console-table-status">Workspace: {{ order.workspace }}</span></p>
+                        <p class="mt-3">{{ rupiah(order.amount) }} · Dibuat {{ dateTime(order.created_at) }}</p>
+                        <p v-if="order.paid_at">Dibayar {{ dateTime(order.paid_at) }}</p>
+                        <Link v-if="order.status === 'pending_payment' && $page.props.developmentPayments" :href="route('billing.index', order.tenant_id) + '#order-history'" class="button button-primary mt-4">Lanjutkan pembayaran</Link>
+                    </article>
+                    <nav v-if="billingHistory.last_page > 1" class="flex flex-wrap items-center gap-4" aria-label="Halaman transaksi">
+                        <Link v-if="billingHistory.prev_page_url" :href="billingHistory.prev_page_url" class="button button-outline">Sebelumnya</Link><span>{{ billingHistory.current_page }} / {{ billingHistory.last_page }}</span><Link v-if="billingHistory.next_page_url" :href="billingHistory.next_page_url" class="button button-outline">Berikutnya</Link>
+                    </nav>
+                </div>
+                <div v-else class="py-6"><p>Belum ada transaksi. Pilih produk dan buat pesanan dari workspace Anda.</p><Link :href="route('dashboard')" class="button button-outline mt-4">Buka workspace</Link></div>
+            </section>
+            <section v-else-if="section === 'information'" class="detail-card">
                 <UpdateProfileInformationForm :must-verify-email="mustVerifyEmail" :status="status" class="max-w-xl" />
             </section>
             <template v-else-if="section === 'security'">
