@@ -16,13 +16,16 @@ class PublishedInvitation {
         return $invitation;
     }
     public static function mediaIds(array $content): array {
-        return array_values(array_filter(array_merge(
-            [$content['cover_id'] ?? null, $content['partner_one_photo_id'] ?? null,
-             $content['partner_two_photo_id'] ?? null, $content['music_id'] ?? null],
-            $content['gallery_ids'] ?? [],
-            [$content['header_image_id'] ?? null, ($content['header_type'] ?? 'image') === 'video' ? ($content['header_video_id'] ?? null) : null,
-             $content['wedding_photo_id'] ?? null, $content['thank_you_image_id'] ?? null],
-            array_column($content['stories'] ?? [], 'image_id')
-        )));
+        $ids = [$content['cover_background_id'] ?? null];
+        $fields = ['cover' => ['cover_id'], 'header' => ['header_image_id'], 'quote' => ['wedding_photo_id'],
+            'groom' => ['partner_one_photo_id'], 'bride' => ['partner_two_photo_id'], 'thanks' => ['thank_you_image_id']];
+        foreach ($fields as $section => $keys) {
+            if (InvitationLayout::enabled($content, $section)) foreach ($keys as $key) $ids[] = $content[$key] ?? null;
+        }
+        if (InvitationLayout::enabled($content, 'header') && ($content['header_type'] ?? 'image') === 'video') $ids[] = $content['header_video_id'] ?? null;
+        if (InvitationLayout::enabled($content, 'gallery')) $ids = array_merge($ids, $content['gallery_ids'] ?? []);
+        if (InvitationLayout::enabled($content, 'story')) $ids = array_merge($ids, array_column($content['stories'] ?? [], 'image_id'));
+        if ($content['music_enabled'] ?? true) $ids[] = $content['music_id'] ?? null;
+        return array_values(array_unique(array_filter($ids)));
     }
 }

@@ -1,6 +1,26 @@
 # Checklist Moshia
 
-Diperbarui: **14 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
+Diperbarui: **15 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
+
+
+## Alur pengisian per bagian — 15 Oktober 2026
+
+- [x] Navigasi utama menjadi Pilih template → Susunan undangan → Preview & publish. Memilih template langsung membuka daftar.
+- [x] Edit isi membuka satu detail dan menyembunyikan daftar; tersedia kembali ke susunan, toggle tampil, dan bagian berikutnya mengikuti urutan pengguna.
+- [x] Pengantin pria/wanita diedit terpisah; Save the Date dan detail acara disatukan. Musik tersedia dari daftar. Isian tetap ada saat berpindah; Simpan draft tetap diperlukan untuk penyimpanan server.
+- [x] Build terbaru 818 modul berhasil. Fixture browser memverifikasi daftar setelah template, detail cover, isian bertahan, pengantin terpisah dan acara dalam satu detail; tanpa exception runtime.
+- Catatan: 207 tes / 2045 assertions di atas merupakan hasil sesi sebelumnya; perubahan kali ini hanya editor dan dokumentasi. UAT upload/publish dengan akun pengguna tetap perlu dilakukan.
+
+## Layout publish dan editor — 15 Oktober 2026
+
+- [x] Layout desktop vertikal 430 px dengan background foto/warna, serta mobile selebar layar.
+- [x] Cover editable, nama tamu melalui parameter `?to=`, tombol buka, header foto/video sesuai paket, navigasi bawah, musik.
+- [x] Tiga belas bagian dapat diurutkan dan ditampilkan/disembunyikan; editor memilih satu bagian melalui **Edit isi**.
+- [x] Countdown acara, galeri, cerita, rekening hadiah aktif per rekening, thank you dan footer.
+- [x] CAPTCHA matematika berbasis session, berlaku 30 menit dan sekali pakai; moderasi ucapan tetap berlaku, pagination 5 ucapan.
+- [x] Suite penuh **207 tes / 2.045 assertions** lulus; build **818 modul**. Fixture browser: desktop 430 px, mobile 390 px tanpa overflow, tombol buka bekerja, 13 tombol Edit isi, tidak ada exception runtime.
+- [ ] UAT dengan foto/video/MP3 pengguna pada perangkat nyata dan pemeriksaan deployment/domain.
+- Detail: [handoff 15 Oktober](../update/MOSHIAUPDATE-15102026.md). Tidak ada migrasi database baru.
 
 ## Susunan undangan lengkap — 14 Oktober 2026
 
@@ -974,3 +994,25 @@ Di editor VS Code, ganti [ ] menjadi [x] setelah pekerjaan pada item selesai. Pe
 - [Excel paket untuk diisi](../../exports/MOSHIA_DRAFT_PAKET_2026-10-02_194603.xlsx)
 
 **Aturan kerja:** setiap npm run build / npm run dev tetap memerlukan approval tombol tool. Jangan reset database, mengaktifkan harga, mengimpor workbook atau deploy hanya karena tercantum di checklist.
+
+## Preview kanan per bagian — 15 Oktober 2026
+
+- [x] Preview kanan mengikuti bagian yang sedang diedit: cover, header, ayat, masing-masing pengantin, acara/resepsi, cerita, galeri, RSVP, ucapan, gift, thank you, footer dan musik.
+- [x] Isian teks dan media terpilih bersifat reaktif tanpa menyimpan draft; bagian nonaktif diberi keterangan tersembunyi saat publish. Video/audio memakai kontrol manual, form RSVP preview nonaktif.
+- [x] Build 820 modul berhasil. Fixture browser memverifikasi perpindahan section, perubahan judul Thank you langsung terlihat, serta pemberitahuan bagian tersembunyi; tidak ada exception runtime.
+- Preview kanan merupakan representasi bagian, bukan render lengkap halaman publish. Media terlihat setelah upload berhasil/pemilihan media; pemeriksaan file asli di perangkat pengguna tetap diperlukan. Tidak ada perubahan backend/migrasi pada tahap ini.
+
+## Preview seluruh susunan — 15 Oktober 2026
+
+- [x] Pada daftar susunan dan tahap review, preview kanan menampilkan semua section dengan Tampil dicentang, sesuai urutan form, dalam satu area scroll. Checkbox dan perubahan urutan langsung memperbarui preview.
+- [x] Saat Edit isi tetap memakai preview satu bagian; pemilihan template memakai preview cover. Jika semua checkbox dimatikan tersedia pesan kosong.
+- [x] Build 820 modul berhasil. Fixture browser memeriksa 13 section, menghilangkan cover saat unchecked, serta memindahkan quote sebelum header. Alur edit per bagian tetap berjalan tanpa exception runtime.
+- Representasi preview editor tetap memakai komponen Vue; Preview privat digunakan untuk meninjau render publish lengkap. Tidak ada perubahan database/backend.
+
+## Slug undangan kustom — 15 Oktober 2026
+
+- [x] Cover menyediakan input slug, Cek ketersediaan, dan Simpan slug terpisah dari draft. Contoh aditsella; 3–36 karakter huruf/angka/tanda hubung, dinormalisasi lowercase dan trim. Nama rute inti tertentu tidak dapat dipakai.
+- [x] Endpoint check/save dilindungi auth, verified, policy update, editorOrder dan throttle. Validasi unique mengabaikan undangan sendiri tetapi mencakup undangan lain, termasuk draft/nonaktif. Unique index database tetap mencegah benturan bersamaan dan ditangani sebagai error validasi.
+- [x] Rute lokal /invitation/{slug} dan domain invitation menerima slug kustom serta UUID lama. Nama tamu ?to= tetap tersedia. Save slug langsung mengganti URL; URL lama tidak diarahkan dan tidak berlaku lagi. Pemeriksaan tersedia bukan reservasi; server memeriksa ulang ketika menyimpan.
+- [x] Tes Wedding 27 tes / 342 assertions lulus; build 820 modul berhasil. Tes mencakup normalisasi, duplikat, format, batas panjang, akses workspace lain, URL baru saat publish dan URL lama 404.
+- Tidak ada migration baru: panjang dibatasi 36 sesuai kolom UUID/CHAR(36) pada MySQL saat ini. Deploy/DNS tidak diubah. Interaksi UI dengan akun pengguna masih perlu review.

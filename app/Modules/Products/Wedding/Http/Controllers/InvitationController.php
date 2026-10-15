@@ -23,8 +23,9 @@ class InvitationController extends Controller
 
         return Inertia::render('Wedding/Edit', [
             'workspace' => $tenant->only('id', 'name'),
-            'invitation' => $invitation->only('draft_content', 'published_at'),
+            'invitation' => $invitation->only('draft_content', 'published_at', 'slug'),
             'order' => $order->only('id', 'terms', 'first_published_at', 'ends_at'),
+            'sectionOptions' => \App\Modules\Products\Wedding\Services\InvitationLayout::LABELS,
             'banks' => \App\Modules\Core\Catalog\Models\Bank::orderBy('name')->get(['id','name']),
             'videoAllowed' => \App\Modules\Products\Wedding\Services\WeddingFeatures::videoHeader($order),
             'uploadedMediaId' => $request->session()->get('wedding_uploaded_media_id'),
@@ -56,6 +57,31 @@ class InvitationController extends Controller
         }
         $billing->saveContent($request->user(), $tenant, $content);
         return back()->with('success', 'Draft tersimpan. Preview sudah diperbarui; halaman publik berubah setelah Publish.');
+    }
+
+    public function slug(Request $request, Tenant $tenant, ManualWeddingBilling $billing)
+    {
+        $billing->editorOrder($request->user(), $tenant);
+        $invitation = Invitation::where('tenant_id', $tenant->id)->firstOrFail();
+        if (is_string($request->input('slug'))) {
+            $request->merge(['slug' => strtolower(trim($request->input('slug')))]);
+        }
+        $data = $request->validate(['slug' => ['required', 'string', 'min:3', 'max:36',
+            'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+            \Illuminate\Validation\Rule::notIn(['admin','login','register','logout','api','storage','build','invitation','workspaces','dashboard','profile','notifications']),
+            \Illuminate\Validation\Rule::unique('wedding_invitations', 'slug')->ignore($invitation->id)]],
+            ['slug.unique' => 'Slug ini sudah digunakan. Silakan pilih nama lain.',
+             'slug.regex' => 'Gunakan huruf kecil, angka, dan tanda hubung tanpa spasi.',
+             'slug.not_in' => 'Slug ini tidak dapat digunakan.']);
+        if ($request->isMethod('get')) {
+            return response()->json(['available' => true, 'slug' => $data['slug']]);
+        }
+        try {
+            $invitation->update(['slug' => $data['slug']]);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['slug' => 'Slug ini baru saja digunakan. Silakan pilih nama lain.']);
+        }
+        return back()->with('success', 'Tautan undangan berhasil diperbarui.');
     }
 
     public function publish(Request $request, Tenant $tenant, ManualWeddingBilling $billing)
@@ -95,12 +121,20 @@ class InvitationController extends Controller
                 ? route('wedding.media.private', [$invitation->tenant_id, $id])
                 : route('wedding.media.public', [$invitation->slug, $id]);
         }
-        $wishes = ($content['wishes_enabled'] ?? false)
-            ? GuestResponse::where('invitation_id', $invitation->id)->where('approved', true)
-                ->whereNotNull('wish')->latest('id')->limit(30)->get(['name','wish'])
-            : collect();
+        $layout = \App\Modules\Products\Wedding\Services\InvitationLayout::sections($content);
+        $guestName = request()->query('to');
+        $guestName = is_string($guestName) ? mb_substr(trim($guestName), 0, 100) : '';
+        $wishes = GuestResponse::where('invitation_id', $invitation->id)->where('approved', true)->whereNotNull('wish');
+        if (!($content['wishes_enabled'] ?? false) || !\App\Modules\Products\Wedding\Services\InvitationLayout::enabled($content, 'messages')) {
+            $wishes->whereRaw('1 = 0');
+        }
+        $wishes = $wishes->latest('id')->paginate(5, ['name', 'wish', 'created_at'], 'wishes_page')->appends(['to' => $guestName])->fragment('messages');
+        $captcha = null;
+        if (!$preview && \App\Modules\Products\Wedding\Services\InvitationLayout::enabled($content, 'rsvp') && (($content['rsvp_enabled'] ?? false) || ($content['wishes_enabled'] ?? false))) {
+            $captcha = app(\App\Modules\Products\Wedding\Services\GuestCaptcha::class)->issue(request(), $invitation->id);
+        }
 
-        return response()->view('wedding.invitation', compact('content', 'preview', 'theme', 'mediaUrls', 'invitation', 'wishes'))
+        return response()->view('wedding.invitation', compact('content', 'preview', 'theme', 'mediaUrls', 'invitation', 'wishes', 'layout', 'guestName', 'captcha'))
             ->header('Cache-Control', 'private, no-store')
             ->header('X-Robots-Tag', 'noindex, nofollow');
     }

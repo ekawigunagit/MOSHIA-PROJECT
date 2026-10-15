@@ -9,6 +9,8 @@ Route::middleware([DevelopmentPayments::class, 'auth', 'verified'])
     ->prefix('workspaces/{tenant}/wedding')->whereNumber('tenant')->name('wedding.')->group(function () {
         Route::get('/', [InvitationController::class, 'edit'])->middleware('can:wedding.invitations.view,tenant')->name('edit');
         Route::patch('/', [InvitationController::class, 'update'])->middleware('throttle:30,1')->middleware('can:wedding.invitations.update,tenant')->name('update');
+        Route::get('/slug', [InvitationController::class, 'slug'])->middleware(['throttle:30,1', 'can:wedding.invitations.update,tenant'])->name('slug.check');
+        Route::patch('/slug', [InvitationController::class, 'slug'])->middleware(['throttle:20,1', 'can:wedding.invitations.update,tenant'])->name('slug.update');
         Route::get('/preview', [InvitationController::class, 'preview'])->middleware('can:wedding.invitations.view,tenant')->name('preview');
         Route::post('/publish', [InvitationController::class, 'publish'])->middleware('throttle:20,1')->middleware('can:wedding.invitations.publish,tenant')->name('publish');
         Route::post('/unpublish', [InvitationController::class, 'unpublish'])->middleware('throttle:20,1')->middleware('can:wedding.invitations.publish,tenant')->name('unpublish');
@@ -27,7 +29,7 @@ $publicRoutes = function () {
     Route::post('/responses', [ResponseController::class, 'store'])->middleware('throttle:10,1')->name('responses.store');
 };
 if ($domain = config('wedding_editor.public_domain')) {
-    Route::domain($domain)->middleware(DevelopmentPayments::class)->prefix('{slug}')->whereUuid('slug')->name('wedding.')->group($publicRoutes);
+    Route::domain($domain)->middleware(DevelopmentPayments::class)->prefix('{slug}')->where(['slug' => '[a-z0-9]+(?:-[a-z0-9]+)*'])->name('wedding.')->group($publicRoutes);
 }
-Route::middleware(DevelopmentPayments::class)->prefix('invitation/{slug}')->whereUuid('slug')
+Route::middleware(DevelopmentPayments::class)->prefix('invitation/{slug}')->where(['slug' => '[a-z0-9]+(?:-[a-z0-9]+)*'])
     ->name(config('wedding_editor.public_domain') ? 'wedding.legacy.' : 'wedding.')->group($publicRoutes);

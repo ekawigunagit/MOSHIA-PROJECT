@@ -23,6 +23,36 @@ class WeddingEditorExperienceTest extends TestCase
     private User $admin;
     private Tenant $tenant;
 
+
+    public function test_custom_slug_is_normalized_unique_and_routes_to_published_invitation(): void {
+        $old = $this->invitation()->slug;
+        $this->getJson(route('wedding.slug.check', ['tenant' => $this->tenant, 'slug' => 'AditSella']))->assertOk()->assertJson(['available' => true, 'slug' => 'aditsella']);
+        $this->assertSame($old, $this->invitation()->slug);
+        $this->patch(route('wedding.slug.update', $this->tenant), ['slug' => ' AditSella '])->assertSessionHasNoErrors();
+        $this->assertSame('aditsella', $this->invitation()->slug);
+        $this->getJson(route('wedding.slug.check', ['tenant' => $this->tenant, 'slug' => 'aditsella']))->assertOk();
+        $other = app(CreateWorkspace::class)->handle($this->owner, 'Other wedding');
+        Invitation::create(['tenant_id' => $other->id, 'slug' => 'taken-slug']);
+        $this->getJson(route('wedding.slug.check', ['tenant' => $this->tenant, 'slug' => 'taken-slug']))->assertUnprocessable()->assertJsonValidationErrors('slug');
+        $this->patch(route('wedding.slug.update', $this->tenant), ['slug' => 'taken-slug'])->assertSessionHasErrors('slug');
+        $this->assertSame('aditsella', $this->invitation()->slug);
+        $this->save();
+        $this->publish();
+        $this->get(route('wedding.public', 'aditsella'))->assertOk();
+        $this->get(route('wedding.public', $old))->assertNotFound();
+    }
+
+    public function test_custom_slug_rejects_invalid_values_and_other_workspace_access(): void {
+        foreach (['ab', 'with space', '../bad', '-bad', 'bad-', 'admin', str_repeat('a', 37)] as $slug) {
+            $this->patch(route('wedding.slug.update', $this->tenant), ['slug' => $slug])->assertSessionHasErrors('slug');
+        }
+        $old = $this->invitation()->slug;
+        $this->actingAs(User::factory()->create());
+        $this->getJson(route('wedding.slug.check', ['tenant' => $this->tenant, 'slug' => 'some-slug']))->assertForbidden();
+        $this->patch(route('wedding.slug.update', $this->tenant), ['slug' => 'some-slug'])->assertForbidden();
+        $this->assertSame($old, $this->invitation()->slug);
+    }
+
     protected function setUp(): void {
         parent::setUp();
         $this->withoutVite();
@@ -154,7 +184,7 @@ class WeddingEditorExperienceTest extends TestCase
         $this->get(route('wedding.preview', $this->tenant))->assertOk()->assertSee('Cerita pertama')
             ->assertSee('Bank BCA')->assertSee('0012345678')->assertSee('Save Our Date')
             ->assertSee('&lt;script&gt;quote&lt;/script&gt;', false)->assertDontSee('<script>quote</script>', false)
-            ->assertSee('Thank You')->assertSee('Made with love - Moshia Invitation');
+            ->assertSee('Thank You')->assertSee('Made with love by Moshia');
         $this->publish();
         $slug = $this->invitation()->slug;
         $this->get(route('wedding.media.public', [$slug, $photo->id]))->assertOk();
@@ -206,12 +236,70 @@ class WeddingEditorExperienceTest extends TestCase
         $this->save(); $this->publish();
         $slug = $this->invitation()->slug;
         config(['wedding_editor.public_domain' => 'invitation.moshia.test']);
-        require app_path('Modules/Products/Wedding/Routes/web.php');
+        \Illuminate\Support\Facades\Route::middleware('web')->group(app_path('Modules/Products/Wedding/Routes/web.php'));
         app('router')->getRoutes()->refreshNameLookups();
         $url = route('wedding.public', $slug);
         $this->assertStringContainsString('invitation.moshia.test/'.$slug, $url);
         $this->get($url)->assertOk();
         $this->get('/invitation/'.$slug.'?to=Tamu')->assertRedirect(route('wedding.public', ['slug' => $slug, 'to' => 'Tamu']));
+    }
+
+
+    private function postGuest(string $url, array $payload) {
+        $token = (string) Str::uuid();
+        $this->withSession(['wedding_captcha' => [$token => ['answer' => 7, 'invitation_id' => $this->invitation()->id, 'expires' => time()+300]]]);
+        return $this->post($url, $payload + ['captcha_token' => $token, 'captcha_answer' => '7']);
+    }
+
+    public function test_layout_order_visibility_guest_link_and_snapshot(): void {
+        $sections = \App\Modules\Products\Wedding\Services\InvitationLayout::sections([]);
+        $sections = array_reverse($sections);
+        foreach ($sections as &$section) if (in_array($section['key'], ['story','groom'])) $section['enabled'] = false;
+        unset($section);
+        $this->save(['sections' => $sections, 'cover_title' => 'Pernikahan Kami', 'story' => 'Hidden story text']);
+        $this->get(route('wedding.preview', $this->tenant).'?to=%3Cscript%3ETamu%3C%2Fscript%3E')
+            ->assertOk()->assertSee('Pernikahan Kami')->assertDontSee('Hidden story text')
+            ->assertSee('&lt;script&gt;Tamu&lt;/script&gt;', false)->assertDontSee('<script>Tamu</script>', false)
+            ->assertSeeInOrder(['id="thanks"', 'id="event"', 'id="bride"', 'id="header"', 'id="cover"'], false)
+            ->assertDontSee('id="groom"', false);
+        $this->publish();
+        $this->save(['story' => 'New draft story']);
+        $this->get(route('wedding.public', $this->invitation()->slug))->assertDontSee('New draft story')->assertSee('Pernikahan Kami');
+        $this->patch(route('wedding.update', $this->tenant), $this->content(['sections' => array_fill(0, 13, ['key'=>'header','enabled'=>true])]))->assertSessionHasErrors('sections.0.key');
+    }
+
+    public function test_captcha_is_required_one_time_expiring_and_invitation_scoped(): void {
+        $this->save(); $this->publish();
+        $url = route('wedding.responses.store', $this->invitation()->slug);
+        $data = ['submission_id'=>(string) Str::uuid(),'name'=>'Tamu','attendance'=>'yes','guests'=>1,'wish'=>'Selamat'];
+        $this->post($url, $data)->assertSessionHasErrors('captcha_token');
+        foreach ([
+            ['answer'=>7,'invitation_id'=>$this->invitation()->id,'expires'=>time()-1],
+            ['answer'=>7,'invitation_id'=>99999,'expires'=>time()+60],
+        ] as $challenge) {
+            $token=(string) Str::uuid();
+            $this->withSession(['wedding_captcha'=>[$token=>$challenge]])->post($url,$data+['captcha_token'=>$token,'captcha_answer'=>'7'])->assertSessionHasErrors('captcha_answer');
+        }
+        $this->get(route('wedding.public', $this->invitation()->slug))->assertOk()->assertSee('Verifikasi sederhana');
+        $challenges=session('wedding_captcha'); $token=array_key_last($challenges);
+        $payload=$data+['captcha_token'=>$token,'captcha_answer'=>(string)$challenges[$token]['answer']];
+        $this->post($url,$payload)->assertSessionHasNoErrors();
+        $this->post($url,array_replace($payload,['submission_id'=>(string) Str::uuid()]))->assertSessionHasErrors('captcha_answer');
+        $this->assertDatabaseCount('wedding_responses',1);
+    }
+
+    public function test_approved_messages_are_paginated_and_hidden_bank_is_not_rendered(): void {
+        $bank=\App\Modules\Core\Catalog\Models\Bank::first();
+        $this->save(['gift_enabled'=>true,'gift_accounts'=>[
+            ['bank_id'=>$bank->id,'account_holder'=>'Visible Holder','account_number'=>'00111111','enabled'=>true],
+            ['bank_id'=>$bank->id,'account_holder'=>'Hidden Holder','account_number'=>'00222222','enabled'=>false],
+        ]]); $this->publish();
+        for($i=1;$i<=7;$i++) GuestResponse::create(['invitation_id'=>$this->invitation()->id,'submission_id'=>(string)Str::uuid(),'name'=>'Tamu '.$i,'wish'=>'Ucapan '.$i,'approved'=>true]);
+        GuestResponse::create(['invitation_id'=>$this->invitation()->id,'submission_id'=>(string)Str::uuid(),'name'=>'Belum disetujui','wish'=>'PRIVATE WISH','approved'=>false]);
+        $url=route('wedding.public',$this->invitation()->slug);
+        $this->get($url.'?to=Eka')->assertOk()->assertSee('Visible Holder')->assertDontSee('Hidden Holder')
+            ->assertSee('Ucapan 7')->assertDontSee('Ucapan 1')->assertDontSee('PRIVATE WISH')->assertSee('wishes_page=2',false)->assertSee('to=Eka',false);
+        $this->get($url.'?wishes_page=2')->assertSee('Ucapan 1')->assertDontSee('Ucapan 7');
     }
 
     private function content(array $overrides = []): array {
@@ -257,7 +345,7 @@ class WeddingEditorExperienceTest extends TestCase
         $this->get(route('wedding.media.private', [$this->tenant, $photo]))->assertOk();
         $this->get(route('wedding.public', $closed->slug))->assertNotFound();
         $this->get(route('wedding.media.public', [$closed->slug, $photo]))->assertNotFound();
-        $this->post(route('wedding.responses.store', $closed->slug), [
+        $this->postGuest(route('wedding.responses.store', $closed->slug), [
             'submission_id' => (string) Str::uuid(), 'name' => 'Guest', 'attendance' => 'yes', 'guests' => 1,
         ])->assertNotFound();
         $this->assertDatabaseCount('wedding_responses', 0);
@@ -348,8 +436,8 @@ class WeddingEditorExperienceTest extends TestCase
         $slug = $this->invitation()->slug;
         $payload = ['submission_id' => (string) Str::uuid(), 'name' => 'Guest-private',
             'attendance' => 'yes', 'guests' => 2, 'wish' => '<script>unsafe()</script>'];
-        $this->post(route('wedding.responses.store', $slug), $payload)->assertSessionHasNoErrors();
-        $this->post(route('wedding.responses.store', $slug), $payload)->assertSessionHasNoErrors();
+        $this->postGuest(route('wedding.responses.store', $slug), $payload)->assertSessionHasNoErrors();
+        $this->postGuest(route('wedding.responses.store', $slug), $payload)->assertSessionHasNoErrors();
         $this->assertDatabaseCount('wedding_responses', 1);
         $response = GuestResponse::firstOrFail();
         $this->get(route('wedding.public', $slug))->assertDontSee('Guest-private');
@@ -365,11 +453,11 @@ class WeddingEditorExperienceTest extends TestCase
         $this->save(['rsvp_enabled' => false, 'wishes_enabled' => false]); $this->publish();
         $slug = $this->invitation()->slug;
         $payload = ['submission_id' => (string) Str::uuid(), 'name' => 'Guest', 'attendance' => 'yes'];
-        $this->post(route('wedding.responses.store', $slug), $payload)->assertNotFound();
+        $this->postGuest(route('wedding.responses.store', $slug), $payload)->assertNotFound();
         $this->save(); $this->publish();
-        $this->post(route('wedding.responses.store', $slug), array_replace($payload, ['guests' => 11]))->assertSessionHasErrors('guests');
+        $this->postGuest(route('wedding.responses.store', $slug), array_replace($payload, ['guests' => 11]))->assertSessionHasErrors('guests');
         $this->travelTo($this->invitation()->publishedOrder->ends_at);
-        $this->post(route('wedding.responses.store', $slug), $payload)->assertNotFound();
+        $this->postGuest(route('wedding.responses.store', $slug), $payload)->assertNotFound();
         $this->assertDatabaseCount('wedding_responses', 0);
     }
     public function test_other_owner_cannot_upload_read_or_moderate(): void {

@@ -13,19 +13,22 @@ class ResponseController extends Controller {
         $invitation = $published->find($slug);
         $content = $invitation->published_content;
         abort_unless(($content['rsvp_enabled'] ?? false) || ($content['wishes_enabled'] ?? false), 404);
+        abort_unless(\App\Modules\Products\Wedding\Services\InvitationLayout::enabled($content, 'rsvp'), 404);
         $data = $request->validate([
+            'captcha_token' => ['required','uuid'], 'captcha_answer' => ['required','string','regex:/^[0-9]{1,2}$/'],
             'submission_id' => ['required','uuid'], 'website' => ['nullable','max:0'],
             'name' => ['required','string','max:100'],
             'attendance' => [($content['rsvp_enabled'] ?? false) ? 'required' : 'prohibited', Rule::in(['yes','no','maybe'])],
             'guests' => ['nullable','integer','min:1','max:10'],
             'wish' => [($content['wishes_enabled'] ?? false) ? 'nullable' : 'prohibited','string','max:1000'],
         ]);
+        app(\App\Modules\Products\Wedding\Services\GuestCaptcha::class)->verify($request, $invitation->id);
         GuestResponse::firstOrCreate(['invitation_id' => $invitation->id, 'submission_id' => $data['submission_id']], [
             'name' => $data['name'], 'attendance' => $data['attendance'] ?? null,
             'guests' => ($data['attendance'] ?? '') === 'yes' ? ($data['guests'] ?? 1) : 0,
             'wish' => $data['wish'] ?? null, 'approved' => false,
         ]);
-        return redirect()->route('wedding.public', $slug)->with('guest_success', 'Terima kasih, respons Anda tersimpan. Ucapan ditampilkan setelah disetujui pemilik.');
+        return redirect()->to(route('wedding.public', $slug).'#rsvp')->with('guest_success', 'Terima kasih, respons Anda tersimpan. Ucapan ditampilkan setelah disetujui pemilik.');
     }
     public function moderate(Request $request, Tenant $tenant, GuestResponse $response, ManualWeddingBilling $billing) {
         $billing->editorOrder($request->user(), $tenant);
