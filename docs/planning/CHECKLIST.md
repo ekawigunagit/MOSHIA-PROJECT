@@ -1,6 +1,14 @@
 # Checklist Moshia
 
-Diperbarui: **15 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
+## Tampilan dashboard — 23 Oktober 2026
+
+- [x] Tombol gradasi merah, font/spacing/input/tabel diperbarui melalui CSS bersama admin/user.
+- [x] Build 821 modul; fixture desktop/mobile dan computed light/dark diperiksa, tanpa overflow mobile atau exception runtime.
+- [ ] Review visual seluruh halaman admin dan pengguna dengan data nyata.
+- Handoff: [23 Oktober](../update/MOSHIAUPDATE-23102026.md).
+
+
+Diperbarui: **23 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
 
 
 ## Alur pengisian per bagian — 15 Oktober 2026

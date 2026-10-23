@@ -3,6 +3,7 @@ import '../css/console.css';
 import '../css/product-plans.css';
 import '../css/wedding-studio.css';
 import '../css/interactions.css';
+import '../css/dashboard-polish.css';
 import './bootstrap';
 
 import { createInertiaApp } from '@inertiajs/vue3';

@@ -1,0 +1,30 @@
+/* Dashboard controls and typography; scoped to the authenticated shell. */
+.moshia-console{font-size:14px;line-height:1.55;--action-gradient:linear-gradient(135deg,#e52238 0%,#d91432 58%,#b9082a 100%)}
+.moshia-console .button,.moshia-console .plan-select{min-height:44px;padding:11px 18px;gap:8px;border-radius:10px;font-size:14px;font-weight:600;line-height:1.35;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;text-align:center;white-space:normal;border:1px solid transparent;transition:background .18s,box-shadow .18s,border-color .18s,color .18s}
+.moshia-console .button:hover,.moshia-console .plan-select:hover{transform:none}
+.moshia-console .button-primary{background:var(--action-gradient);color:#fff;border-color:#cc1832;box-shadow:0 3px 8px #c5163026,inset 0 1px 0 #ffffff24}
+.moshia-console .button-outline{background:var(--surface);color:var(--text);border-color:var(--line);box-shadow:0 1px 2px #11182706}
+.moshia-console :is(button,a.button,a.plan-select):focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.moshia-console :is(button,.button):disabled{cursor:not-allowed;opacity:.5;transform:none;box-shadow:none}
+.moshia-console .button .shell-icon{width:18px;height:18px}
+.moshia-console .dashboard-actions,.moshia-console .studio-form-footer{gap:10px;flex-wrap:wrap}
+.moshia-console .detail-card,.moshia-console .product-card{border-radius:14px;box-shadow:0 2px 8px #18202f05}
+.moshia-console :is(.detail-card,.product-card) h2{font-size:20px;line-height:1.35;font-weight:650;letter-spacing:-.02em}
+.moshia-console .moshia-label{font-size:14px;line-height:1.5;font-weight:500;margin-bottom:6px}
+.moshia-console .moshia-input{min-height:44px;padding:11px 13px;font-size:14px;line-height:1.5;background:var(--surface);border:1px solid var(--line);border-radius:9px;transition:border-color .18s,box-shadow .18s}
+.moshia-console .moshia-input:focus{border-color:var(--red);outline:none;box-shadow:0 0 0 3px #e5223818}
+.moshia-console :is(.studio-help,.console-profile-subtitle){font-size:13px;line-height:1.65}
+.moshia-console .console-table{font-size:14px;line-height:1.5}
+.moshia-console .console-table th{font-size:12px;font-weight:600;letter-spacing:.025em}
+.moshia-console .console-table :is(th,td){padding:13px 16px}
+.moshia-console .console-table tbody tr:hover{background:var(--bg)}
+.moshia-console .console-nav-item{border-radius:9px;font-size:14px;min-height:44px;gap:11px}
+.moshia-console .console-nav-item.active{background:var(--soft-red);box-shadow:inset 3px 0 0 var(--red)}
+.moshia-console .console-workspace-submenu .console-nav-item{font-size:13px}
+.moshia-console .console-header-title h2{font-size:15px!important;font-weight:600!important}
+.moshia-console .section-actions button{min-width:38px;min-height:38px;padding:8px 11px;border-radius:8px;font-size:13px;font-weight:500}
+.moshia-console .studio-steps button{min-height:44px;font-size:13px;border-radius:9px}
+.moshia-console .studio-text-link{font-size:13px;line-height:1.5;min-height:36px;padding:6px 4px;border-radius:6px}
+.moshia-console input[type="checkbox"]{accent-color:var(--red)}
+@media(max-width:899px){.moshia-console .moshia-input{font-size:16px}.moshia-console .section-actions button{min-height:44px;min-width:44px}.moshia-console .detail-card{padding:20px}.moshia-console .button{max-width:100%}}
+@media(prefers-reduced-motion:reduce){.moshia-console :is(.button,.plan-select,.moshia-input){transition:none}}
