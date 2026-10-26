@@ -1,5 +1,14 @@
 # Checklist Moshia
 
+## Konsistensi dashboard/Manage — 24 Oktober 2026
+
+- Penanda aktif terbaru: garis merah kiri sidebar/submenu dan bagian susunan dihapus, diganti background merah transparan (14% terang, 23% gelap). Build disetujui **821 modul**, diff whitespace diperiksa; perubahan CSS saja, UAT visual pending dan centang tetap.
+
+- Penyelarasan panel susunan sesuai screenshot: Edit isi gradasi merah, tombol urutan 44 px, kartu/nomor/teks konsisten, checkbox/focus merah mengganti biru forms, langkah aktif gradasi, bingkai preview mengikuti dashboard. Isi preview tetap tema undangan. Build disetujui **821 modul**, backend tidak diuji ulang, UAT visual pending; status centang tetap.
+
+- Sidebar workspace aktif kini mengikuti Manage Wedding, billing dan edit workspace; ID workspace halaman diprioritaskan atas session. Font/menu profil/tab dan kontrol editor disamakan melalui dashboard-polish bersama admin/pengguna. Template undangan publik tetap mengikuti desainnya.
+- Source/diff whitespace diperiksa; build setelah persetujuan berhasil **821 modul**. UAT visual desktop/mobile/dark mode belum dilakukan sesi ini; tidak mengubah centang penyelesaian fitur. Handoff: [24 Oktober](../update/MOSHIAUPDATE-24102026.md).
+
 ## Tampilan dashboard — 23 Oktober 2026
 
 - [x] Tombol gradasi merah, font/spacing/input/tabel diperbarui melalui CSS bersama admin/user.
@@ -8,7 +17,7 @@
 - Handoff: [23 Oktober](../update/MOSHIAUPDATE-23102026.md).
 
 
-Diperbarui: **23 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
+Diperbarui: **24 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item).
 
 
 ## Alur pengisian per bagian — 15 Oktober 2026
@@ -79,7 +88,7 @@ Diperbarui: **23 Oktober 2026**. Versi mudah dibaca dari checklist v1.2 (54 item
 - S03: loading logo global untuk navigasi/form Inertia, ring merah 64 px dan logo 28 px. Loading checkout disatukan; notifikasi Axios memakai indikator di panel. Tidak memberi delay buatan untuk aksi instan. UAT browser sukses/error/cancel/upload/mobile masih pending; status centang tetap.
 - Handoff terbaru: [MOSHIAUPDATE-10102026.md](../update/MOSHIAUPDATE-10102026.md). Pemeriksaan whitespace lulus. Build setelah persetujuan berhasil **816 modul**; backend tidak diubah/diuji ulang pada sesi ini.
 
-**Aturan dokumentasi:** setiap perubahan/penambahan wajib memperbarui checklist ini dan handoff `docs/update/MOSHIAUPDATE-DDMMYYYY.md` sesuai tanggal hari itu (Asia/Bangkok). Aturan persisten: `../../AGENTS.md`. Handoff hari ini: [MOSHIAUPDATE-14102026.md](../update/MOSHIAUPDATE-14102026.md).
+**Aturan dokumentasi:** setiap perubahan/penambahan wajib memperbarui checklist ini dan handoff `docs/update/MOSHIAUPDATE-DDMMYYYY.md` sesuai tanggal hari itu (Asia/Bangkok). Aturan persisten: `../../AGENTS.md`. Handoff hari ini: [MOSHIAUPDATE-24102026.md](../update/MOSHIAUPDATE-24102026.md).
 
 ## Pembaruan terakhir — keranjang dan dokumentasi harian
 

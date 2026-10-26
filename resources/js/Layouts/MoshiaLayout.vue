@@ -8,7 +8,8 @@ import ConsoleBreadcrumb from '@/Components/ConsoleBreadcrumb.vue';
 const page = usePage();
 const drawer = ref(false);
 const workspaceOpen = ref(true);
-const selectedWorkspaceId = computed(() => page.props.activeWorkspace?.id ?? page.props.selectedWorkspaceId ?? page.props.workspaceNavigation?.[0]?.id);
+const selectedWorkspaceId = computed(() => page.props.workspace?.id ?? page.props.activeWorkspace?.id ?? page.props.selectedWorkspaceId ?? page.props.workspaceNavigation?.[0]?.id);
+const workspaceContext = computed(() => ['Dashboard', 'Workspaces/Edit', 'Wedding/Edit', 'Billing/Index'].includes(page.component));
 const accountOpen = ref(false);
 const accountRoot = ref(null);
 const accountPanel = ref(null);
@@ -150,10 +151,10 @@ onUnmounted(() => {
             <nav class="console-navigation" aria-label="Navigasi utama">
                 <template v-for="item in navigation" :key="item.params?.slug ?? item.route">
                     <template v-if="item.route === 'dashboard'">
-                        <button type="button" class="console-nav-item console-workspace-toggle" :class="{ active: page.component === 'Dashboard' || page.component === 'Workspaces/Create' }" :aria-expanded="workspaceOpen" aria-controls="workspace-submenu" @click="workspaceOpen = !workspaceOpen"><ShellIcon :name="item.icon" /><span>{{ item.label }}</span><ShellIcon name="chevron" class="console-nav-chevron" :class="{ 'is-expanded': workspaceOpen }" /></button>
+                        <button type="button" class="console-nav-item console-workspace-toggle" :class="{ active: workspaceContext || page.component === 'Workspaces/Create' }" :aria-expanded="workspaceOpen" aria-controls="workspace-submenu" @click="workspaceOpen = !workspaceOpen"><ShellIcon :name="item.icon" /><span>{{ item.label }}</span><ShellIcon name="chevron" class="console-nav-chevron" :class="{ 'is-expanded': workspaceOpen }" /></button>
                         <nav v-show="workspaceOpen" id="workspace-submenu" class="console-workspace-submenu" aria-label="Workspace">
                             <Link :href="route('workspaces.create')" class="console-nav-item" :class="{ active: page.component === 'Workspaces/Create' }" :aria-current="page.component === 'Workspaces/Create' ? 'page' : undefined" @click="closeDrawer()"><span aria-hidden="true">+</span><span>Tambah Workspace</span></Link>
-                            <Link v-for="workspace in page.props.workspaceNavigation" :key="workspace.id" :href="route('workspaces.select', workspace.id)" method="post" as="button" class="console-nav-item" :class="{ active: page.component === 'Dashboard' && Number(selectedWorkspaceId) === workspace.id }" :aria-current="page.component === 'Dashboard' && Number(selectedWorkspaceId) === workspace.id ? 'page' : undefined" @click="closeDrawer()"><ShellIcon name="grid" /><span>{{ workspace.name }}</span></Link>
+                            <Link v-for="workspace in page.props.workspaceNavigation" :key="workspace.id" :href="route('workspaces.select', workspace.id)" method="post" as="button" class="console-nav-item" :class="{ active: workspaceContext && Number(selectedWorkspaceId) === workspace.id }" :aria-current="workspaceContext && Number(selectedWorkspaceId) === workspace.id ? 'page' : undefined" @click="closeDrawer()"><ShellIcon name="grid" /><span>{{ workspace.name }}</span></Link>
                         </nav>
                     </template>
                     <Link v-else :href="route(item.route, item.params)" :aria-current="itemActive(item) ? 'page' : undefined" class="console-nav-item" :class="{ active: itemActive(item) }" @click="closeDrawer()"><ShellIcon :name="item.icon" /><span>{{ item.label }}</span><ShellIcon v-if="itemActive(item)" name="chevron" class="console-nav-chevron" /></Link>

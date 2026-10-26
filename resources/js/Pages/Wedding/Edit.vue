@@ -303,7 +303,7 @@ onUnmounted(() => window.removeEventListener('beforeunload', leave));
                                 <li v-for="(section, index) in form.sections" :key="section.key" :class="{ 'is-selected': selectedSection === section.key, 'is-disabled': !section.enabled }">
                                     <span class="section-position">{{ index + 1 }}</span><strong>{{ sectionOptions[section.key] }}</strong>
                                     <label class="section-toggle"><input v-model="section.enabled" type="checkbox" :disabled="busy" /> Tampil</label>
-                                    <div class="section-actions"><button type="button" :disabled="busy || index === 0" :aria-label="'Naikkan ' + sectionOptions[section.key]" @click="moveSection(index, -1)">↑</button><button type="button" :disabled="busy || index === form.sections.length - 1" :aria-label="'Turunkan ' + sectionOptions[section.key]" @click="moveSection(index, 1)">↓</button><button type="button" :disabled="busy" @click="editSection(section.key)">Edit isi</button></div>
+                                    <div class="section-actions"><button type="button" class="button button-outline studio-reorder" :disabled="busy || index === 0" :aria-label="'Naikkan ' + sectionOptions[section.key]" @click="moveSection(index, -1)">↑</button><button type="button" class="button button-outline studio-reorder" :disabled="busy || index === form.sections.length - 1" :aria-label="'Turunkan ' + sectionOptions[section.key]" @click="moveSection(index, 1)">↓</button><button type="button" class="button button-primary" :disabled="busy" @click="editSection(section.key)">Edit isi</button></div>
                                 </li>
                             </ol><button type="button" class="button button-outline mt-4" @click="editSection('music')">Atur musik latar</button>
                             </div><div v-show="editingSection"><p class="studio-help" role="status">Sedang mengedit: <strong>{{ sectionOptions[selectedSection] ?? 'Musik' }}</strong>. Simpan draft lalu buka Preview untuk melihat hasil.</p>
@@ -403,7 +403,7 @@ onUnmounted(() => window.removeEventListener('beforeunload', leave));
                     </form>
                 </div>
                 <aside class="studio-summary" aria-label="Preview undangan">
-<h3 class="mb-3 font-semibold">Preview {{ editingSection ? (sectionOptions[selectedSection] ?? 'Musik latar') : step === 0 ? 'Cover' : 'seluruh undangan' }}</h3>
+<h3 class="studio-preview-heading">Preview {{ editingSection ? (sectionOptions[selectedSection] ?? 'Musik latar') : step === 0 ? 'Cover' : 'seluruh undangan' }}</h3>
 <template v-if="!editingSection && step !== 0">
 <div class="studio-full-preview" tabindex="0" aria-label="Preview seluruh bagian yang ditampilkan">
 <WeddingSectionPreview v-for="section in form.sections.filter(s => s.enabled)" :key="section.key" :section="section.key" :data-preview-section="section.key" compact :form="form" :theme="chosenTheme" :media="media" :banks="banks" :names="firstName + ' & ' + secondName" :guest="guestLinkName" />

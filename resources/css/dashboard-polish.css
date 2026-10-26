@@ -1,4 +1,34 @@
 /* Dashboard controls and typography; scoped to the authenticated shell. */
+/* Wedding management controls share the console palette, not the invitation theme. */
+.moshia-console .wedding-studio .section-organizer{gap:12px}
+.moshia-console .wedding-studio .section-organizer li{padding:16px;gap:12px;border-radius:14px;box-shadow:0 2px 8px #18202f05;flex-wrap:wrap}
+.moshia-console .wedding-studio .section-organizer li.is-selected{background:var(--active-menu-bg);border-color:var(--line);box-shadow:none}
+.moshia-console .wedding-studio .section-organizer strong{font-size:14px;font-weight:600;line-height:1.5;min-width:120px}
+.moshia-console .wedding-studio .section-position{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:var(--bg);color:var(--muted);font-size:12px;font-weight:600;flex-shrink:0}
+.moshia-console .wedding-studio .is-selected .section-position{background:var(--red);color:#fff}
+.moshia-console .wedding-studio .section-toggle{font-size:13px;gap:8px;min-height:44px;cursor:pointer}
+.moshia-console .wedding-studio input[type="checkbox"]{color:var(--red);accent-color:var(--red);width:18px;height:18px;border:1px solid var(--line);border-radius:5px;cursor:pointer}
+.moshia-console .wedding-studio input[type="checkbox"]:checked{background-color:var(--red);border-color:var(--red)}
+.moshia-console .wedding-studio input[type="checkbox"]:focus{--tw-ring-color:var(--red)}
+.moshia-console .wedding-studio .section-actions{gap:8px;flex-wrap:wrap;margin-left:auto}
+.moshia-console .wedding-studio .section-actions .button{min-height:44px;font-size:14px;border-radius:10px}
+.moshia-console .wedding-studio .section-actions .studio-reorder{width:44px;min-width:44px;padding:10px;font-size:18px}
+.moshia-console .wedding-studio .studio-summary{padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 8px #18202f05}
+.moshia-console .wedding-studio .studio-preview-heading{font-size:14px;font-weight:600;color:var(--text);margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.moshia-console .wedding-studio .studio-full-preview{border-radius:14px}
+.moshia-console .wedding-studio .studio-steps button.active{background:var(--action-gradient);color:#fff}
+.moshia-console .wedding-studio .studio-steps button.active>span{background:#ffffff26;border-color:#ffffff60;color:#fff}
+.moshia-console{font-family:'Instrument Sans',Arial,sans-serif}
+.moshia-console :is(.console-sidebar,.console-topbar,.console-account-panel){font-family:inherit;line-height:1.55}
+.moshia-console :is(.console-nav-item,.console-account-link,.console-profile-tabs a){font-family:inherit;font-size:14px;font-weight:500;line-height:1.4;min-height:44px;border-radius:9px}
+.moshia-console .console-nav-item.active{font-weight:600}
+.moshia-console .console-nav-item>span{min-width:0;overflow-wrap:anywhere}
+.moshia-console .console-account-heading strong{font-size:14px}
+.moshia-console .console-account-heading span{font-size:13px}
+.moshia-console .console-breadcrumb{font-size:13px;line-height:1.5}
+.moshia-console :is(.studio-period,.section-organizer strong,.studio-template>strong){font-size:14px}
+.moshia-console :is(.section-toggle,.section-position,.studio-template>small,.template-choice,.studio-setting small,.studio-review dt,.studio-media-grid span,.studio-upload input[type=file]){font-size:13px;line-height:1.5}
+.moshia-console .studio-grid>*,.moshia-console .studio-two-fields>*{min-width:0}
 .moshia-console{font-size:14px;line-height:1.55;--action-gradient:linear-gradient(135deg,#e52238 0%,#d91432 58%,#b9082a 100%)}
 .moshia-console .button,.moshia-console .plan-select{min-height:44px;padding:11px 18px;gap:8px;border-radius:10px;font-size:14px;font-weight:600;line-height:1.35;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;text-align:center;white-space:normal;border:1px solid transparent;transition:background .18s,box-shadow .18s,border-color .18s,color .18s}
 .moshia-console .button:hover,.moshia-console .plan-select:hover{transform:none}
@@ -19,7 +49,9 @@
 .moshia-console .console-table :is(th,td){padding:13px 16px}
 .moshia-console .console-table tbody tr:hover{background:var(--bg)}
 .moshia-console .console-nav-item{border-radius:9px;font-size:14px;min-height:44px;gap:11px}
-.moshia-console .console-nav-item.active{background:var(--soft-red);box-shadow:inset 3px 0 0 var(--red)}
+.moshia-console{--active-menu-bg:rgb(229 34 56 / 14%)}
+html.dark .moshia-console{--active-menu-bg:rgb(229 34 56 / 23%)}
+.moshia-console .console-nav-item.active{background:var(--active-menu-bg);box-shadow:none}
 .moshia-console .console-workspace-submenu .console-nav-item{font-size:13px}
 .moshia-console .console-header-title h2{font-size:15px!important;font-weight:600!important}
 .moshia-console .section-actions button{min-width:38px;min-height:38px;padding:8px 11px;border-radius:8px;font-size:13px;font-weight:500}
